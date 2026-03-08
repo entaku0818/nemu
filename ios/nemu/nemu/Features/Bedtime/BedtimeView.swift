@@ -4,10 +4,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct BedtimeView: View {
     @State private var viewModel = BedtimeViewModel()
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @State private var isDimmed = false
     @State private var showMemo = false
 
@@ -148,6 +150,9 @@ struct BedtimeView: View {
         }
         .sheet(isPresented: $showMemo) {
             MemoView(memo: $viewModel.memo)
+        }
+        .onAppear {
+            viewModel.startSession(modelContext: modelContext)
         }
         .onDisappear {
             viewModel.finish()

@@ -7,6 +7,7 @@ import Foundation
 import Observation
 import AVFoundation
 import UIKit
+import SwiftData
 
 @Observable
 @MainActor
@@ -122,10 +123,36 @@ final class BedtimeViewModel {
         UIScreen.main.brightness = originalBrightness
     }
 
+    // MARK: - SleepSession記録
+
+    private var modelContext: ModelContext?
+    private var currentSession: SleepSession?
+
+    func startSession(modelContext: ModelContext) {
+        self.modelContext = modelContext
+        let session = SleepSession(bedTime: Date())
+        modelContext.insert(session)
+        try? modelContext.save()
+        self.currentSession = session
+
+        // センサー監視開始
+        SleepMonitorService.shared.startMonitoring(bedTime: Date())
+    }
+
+    func endSession() {
+        guard let session = currentSession, let context = modelContext else { return }
+        session.wakeTime = Date()
+        session.motionEventCount = SleepMonitorService.shared.motionEventCount
+        session.calculateScore()
+        try? context.save()
+        SleepMonitorService.shared.stopMonitoring()
+    }
+
     // MARK: - 終了
     func finish() {
         stopBreathing()
         audioPlayer?.stop()
         restoreScreen()
+        endSession()
     }
 }

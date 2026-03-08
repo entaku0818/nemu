@@ -15,13 +15,13 @@ struct nemuApp: App {
     var body: some Scene {
         WindowGroup {
             if hasCompletedOnboarding {
-                HomeView()
+                MainTabView()
             } else {
                 OnboardingView {
                     hasCompletedOnboarding = true
                 }
             }
         }
-        .modelContainer(for: AlarmSetting.self)
+        .modelContainer(for: [AlarmSetting.self, SleepSession.self])
     }
 }
