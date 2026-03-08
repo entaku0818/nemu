@@ -57,6 +57,24 @@ final class HomeViewModel {
 
     func startBedtime() {
         isBedtimeMode = true
+        scheduleAlarmIfNeeded()
+    }
+
+    // MARK: - AlarmKit
+
+    func scheduleAlarmIfNeeded() {
+        guard isAlarmEnabled else { return }
+        let alarmService = AlarmService.shared
+        guard let nextDate = alarmService.nextAlarmDate(wakeTime: wakeTime, repeatDays: repeatDays) else { return }
+        Task {
+            await alarmService.scheduleAlarm(at: nextDate, repeatDays: repeatDays)
+        }
+    }
+
+    func cancelAlarm() {
+        Task {
+            await AlarmService.shared.cancelAlarm()
+        }
     }
 
     var wakeTimeFormatted: String {
