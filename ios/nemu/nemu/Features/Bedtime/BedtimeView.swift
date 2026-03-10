@@ -12,6 +12,7 @@ struct BedtimeView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var isDimmed = false
     @State private var showMemo = false
+    @State private var showWakeConfirm = false
 
     var body: some View {
         ZStack {
@@ -85,8 +86,7 @@ struct BedtimeView: View {
 
                 VStack(spacing: 16) {
                     Button {
-                        viewModel.finish()
-                        dismiss()
+                        showWakeConfirm = true
                     } label: {
                         Label("起きた！", systemImage: "sun.max.fill")
                             .font(.headline)
@@ -127,6 +127,13 @@ struct BedtimeView: View {
             MemoView(memo: $viewModel.memo)
         }
         .interactiveDismissDisabled(true)
+        .alert("本当に起きた？", isPresented: $showWakeConfirm) {
+            Button("起きた！", role: .destructive) {
+                viewModel.finish()
+                dismiss()
+            }
+            Button("まだ寝る", role: .cancel) {}
+        }
         .onAppear {
             viewModel.startSession(modelContext: modelContext)
         }
