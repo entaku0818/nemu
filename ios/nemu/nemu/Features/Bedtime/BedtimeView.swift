@@ -21,14 +21,6 @@ struct BedtimeView: View {
 
                 // ヘッダー
                 HStack {
-                    Button {
-                        viewModel.finish()
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.title3)
-                            .foregroundStyle(.white.opacity(0.5))
-                    }
                     Spacer()
                     Text("就寝モード")
                         .font(.headline)
@@ -47,50 +39,16 @@ struct BedtimeView: View {
 
                 Spacer()
 
-                // 呼吸法ガイド
-                VStack(spacing: 20) {
-                    ZStack {
-                        // 外側の輪（進捗）
-                        Circle()
-                            .stroke(Color.white.opacity(0.1), lineWidth: 3)
-                            .frame(width: 200, height: 200)
+                // 月アイコン
+                Image(systemName: "moon.stars.fill")
+                    .font(.system(size: 80))
+                    .foregroundStyle(.indigo.opacity(0.6))
 
-                        Circle()
-                            .trim(from: 0, to: viewModel.breathPhase == .idle ? 0 : viewModel.breathProgress)
-                            .stroke(Color.indigo, style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                            .frame(width: 200, height: 200)
-                            .rotationEffect(.degrees(-90))
-                            .animation(.linear(duration: 0.1), value: viewModel.breathProgress)
+                Text("おやすみなさい")
+                    .font(.title3)
+                    .foregroundStyle(.white.opacity(0.5))
 
-                        // 内側の円（息の大きさ）
-                        Circle()
-                            .fill(Color.indigo.opacity(0.3))
-                            .frame(
-                                width: breathCircleSize,
-                                height: breathCircleSize
-                            )
-                            .animation(.easeInOut(duration: 0.5), value: breathCircleSize)
-
-                        VStack(spacing: 4) {
-                            Text(viewModel.breathPhase.label)
-                                .font(.title2.bold())
-                                .foregroundStyle(.white)
-
-                            if viewModel.breathPhase != .idle {
-                                Text("\(viewModel.breathCycleCount) サイクル")
-                                    .font(.caption)
-                                    .foregroundStyle(.white.opacity(0.4))
-                            }
-                        }
-                    }
-                    .onTapGesture {
-                        viewModel.toggleBreathing()
-                    }
-
-                    Text("478呼吸法")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.3))
-                }
+                Spacer()
 
                 // 自然音セレクター
                 VStack(spacing: 12) {
@@ -151,20 +109,12 @@ struct BedtimeView: View {
         .sheet(isPresented: $showMemo) {
             MemoView(memo: $viewModel.memo)
         }
+        .interactiveDismissDisabled(true)
         .onAppear {
             viewModel.startSession(modelContext: modelContext)
         }
         .onDisappear {
             viewModel.finish()
-        }
-    }
-
-    private var breathCircleSize: CGFloat {
-        switch viewModel.breathPhase {
-        case .inhale:  return 80 + 60 * viewModel.breathProgress
-        case .hold:    return 140
-        case .exhale:  return 140 - 60 * viewModel.breathProgress
-        case .idle:    return 80
         }
     }
 }

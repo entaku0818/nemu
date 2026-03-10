@@ -16,67 +16,6 @@ final class BedtimeViewModel {
     // MARK: - メモ
     var memo: String = ""
 
-    // MARK: - 呼吸法（4-7-8）
-    enum BreathPhase {
-        case inhale, hold, exhale, idle
-
-        var label: String {
-            switch self {
-            case .inhale: return "吸う"
-            case .hold:   return "止める"
-            case .exhale: return "吐く"
-            case .idle:   return "タップで開始"
-            }
-        }
-
-        var duration: Double {
-            switch self {
-            case .inhale: return 4
-            case .hold:   return 7
-            case .exhale: return 8
-            case .idle:   return 0
-            }
-        }
-    }
-
-    var breathPhase: BreathPhase = .idle
-    var breathProgress: Double = 0.0
-    var breathCycleCount: Int = 0
-    private var breathTask: Task<Void, Never>?
-
-    func toggleBreathing() {
-        if breathPhase == .idle {
-            startBreathing()
-        } else {
-            stopBreathing()
-        }
-    }
-
-    private func startBreathing() {
-        breathTask = Task {
-            while !Task.isCancelled {
-                for phase in [BreathPhase.inhale, .hold, .exhale] {
-                    guard !Task.isCancelled else { return }
-                    breathPhase = phase
-                    let steps = 60
-                    for i in 0...steps {
-                        guard !Task.isCancelled else { return }
-                        breathProgress = Double(i) / Double(steps)
-                        try? await Task.sleep(nanoseconds: UInt64(phase.duration / Double(steps) * 1_000_000_000))
-                    }
-                }
-                breathCycleCount += 1
-            }
-        }
-    }
-
-    func stopBreathing() {
-        breathTask?.cancel()
-        breathTask = nil
-        breathPhase = .idle
-        breathProgress = 0
-    }
-
     // MARK: - 自然音
     enum SoundType: String, CaseIterable, Identifiable {
         case rain = "雨"
@@ -134,8 +73,6 @@ final class BedtimeViewModel {
         modelContext.insert(session)
         try? modelContext.save()
         self.currentSession = session
-
-        // センサー監視開始
         SleepMonitorService.shared.startMonitoring(bedTime: Date())
     }
 
@@ -150,7 +87,6 @@ final class BedtimeViewModel {
 
     // MARK: - 終了
     func finish() {
-        stopBreathing()
         audioPlayer?.stop()
         restoreScreen()
         endSession()
