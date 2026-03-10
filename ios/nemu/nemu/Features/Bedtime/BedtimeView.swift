@@ -83,26 +83,43 @@ struct BedtimeView: View {
 
                 Spacer()
 
-                // 減光ボタン
-                Button {
-                    isDimmed.toggle()
-                    if isDimmed {
-                        viewModel.dimScreen()
-                    } else {
-                        viewModel.restoreScreen()
+                VStack(spacing: 16) {
+                    Button {
+                        viewModel.finish()
+                        dismiss()
+                    } label: {
+                        Label("起きた！", systemImage: "sun.max.fill")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 18)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.indigo.gradient)
+                            )
                     }
-                } label: {
-                    Label(isDimmed ? "画面を戻す" : "画面を暗くする",
-                          systemImage: isDimmed ? "sun.max.fill" : "moon.fill")
-                        .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.6))
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 12)
-                        .background(
-                            Capsule()
-                                .fill(Color.white.opacity(0.08))
-                        )
+
+                    Button {
+                        isDimmed.toggle()
+                        if isDimmed {
+                            viewModel.dimScreen()
+                        } else {
+                            viewModel.restoreScreen()
+                        }
+                    } label: {
+                        Label(isDimmed ? "画面を戻す" : "画面を暗くする",
+                              systemImage: isDimmed ? "sun.max.fill" : "moon.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.6))
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 12)
+                            .background(
+                                Capsule()
+                                    .fill(Color.white.opacity(0.08))
+                            )
+                    }
                 }
+                .padding(.horizontal)
                 .padding(.bottom, 32)
             }
         }
