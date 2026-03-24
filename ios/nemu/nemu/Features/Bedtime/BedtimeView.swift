@@ -14,6 +14,19 @@ struct BedtimeView: View {
     @State private var showMemo = false
     @State private var showWakeConfirm = false
     @State private var showPaywall = false
+    @State private var bedStartTime = Date()
+    @State private var elapsedTime: TimeInterval = 0
+    private let elapsedTimer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
+
+    private var elapsedTimeText: String {
+        let hours = Int(elapsedTime) / 3600
+        let minutes = (Int(elapsedTime) % 3600) / 60
+        if hours > 0 {
+            return "\(hours)時間\(minutes)分"
+        } else {
+            return "\(minutes)分"
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -49,6 +62,13 @@ struct BedtimeView: View {
                 Text("おやすみなさい")
                     .font(.title3)
                     .foregroundStyle(.white.opacity(0.5))
+
+                if elapsedTime >= 60 {
+                    Text(elapsedTimeText)
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.25))
+                        .monospacedDigit()
+                }
 
                 Spacer()
 
@@ -136,7 +156,11 @@ struct BedtimeView: View {
             }
             Button("まだ寝る", role: .cancel) {}
         }
+        .onReceive(elapsedTimer) { _ in
+            elapsedTime = Date().timeIntervalSince(bedStartTime)
+        }
         .onAppear {
+            bedStartTime = Date()
             viewModel.startSession(modelContext: modelContext)
         }
         .onDisappear {
