@@ -95,6 +95,11 @@ final class BedtimeViewModel {
 
     private var modelContext: ModelContext?
     private var currentSession: SleepSession?
+    private var isFinished = false
+
+    /// finish()後に参照できる直近セッション結果
+    private(set) var lastScore: Int = 0
+    private(set) var lastDuration: TimeInterval = 0
 
     func startSession(modelContext: ModelContext) {
         self.modelContext = modelContext
@@ -120,6 +125,8 @@ final class BedtimeViewModel {
         session.wakeTime = Date()
         session.motionEventCount = SleepMonitorService.shared.motionEventCount
         session.calculateScore()
+        lastScore = session.score
+        lastDuration = session.duration
         do {
             try context.save()
         } catch {
@@ -132,9 +139,28 @@ final class BedtimeViewModel {
     var isUnlocked: Bool { PurchaseService.shared.isPremium }
 
     // MARK: - 終了
+
     func finish() {
+        guard !isFinished else { return }
+        isFinished = true
         restoreScreen()
         endSession()
         NotificationCenter.default.post(name: .didWakeUp, object: nil)
+    }
+
+    /// 記録を保存せずにセッションを破棄する（緊急終了用）
+    func cancelSession() {
+        guard !isFinished else { return }
+        isFinished = true
+        audioPlayer?.stop()
+        audioPlayer = nil
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        restoreScreen()
+        if let session = currentSession, let context = modelContext {
+            currentSession = nil
+            context.delete(session)
+            try? context.save()
+        }
+        SleepMonitorService.shared.stopMonitoring()
     }
 }
