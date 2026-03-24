@@ -113,6 +113,10 @@ final class BedtimeViewModel {
     func endSession() {
         guard let session = currentSession, let context = modelContext else { return }
         currentSession = nil  // 二重呼び出し防止
+        // 音声リソースを確実に解放
+        audioPlayer?.stop()
+        audioPlayer = nil
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         session.wakeTime = Date()
         session.motionEventCount = SleepMonitorService.shared.motionEventCount
         session.calculateScore()
@@ -129,9 +133,6 @@ final class BedtimeViewModel {
 
     // MARK: - 終了
     func finish() {
-        audioPlayer?.stop()
-        audioPlayer = nil
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         restoreScreen()
         endSession()
         NotificationCenter.default.post(name: .didWakeUp, object: nil)
