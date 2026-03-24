@@ -295,7 +295,7 @@ struct EmptyReportCard: View {
             Text("まだ睡眠資産がありません")
                 .font(.subheadline)
                 .foregroundStyle(.white.opacity(0.4))
-            Text("「就寝する」ボタンを押して\n最初の資産を積み上げましょう")
+            Text("「就寝モードへ」ボタンを押して\n最初の資産を積み上げましょう")
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.3))
                 .multilineTextAlignment(.center)
