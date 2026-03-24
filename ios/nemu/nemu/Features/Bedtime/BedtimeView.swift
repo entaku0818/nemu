@@ -13,6 +13,7 @@ struct BedtimeView: View {
     @State private var isDimmed = false
     @State private var showMemo = false
     @State private var showWakeConfirm = false
+    @State private var showPaywall = false
 
     var body: some View {
         ZStack {
@@ -60,24 +61,14 @@ struct BedtimeView: View {
 
                     HStack(spacing: 12) {
                         ForEach(BedtimeViewModel.SoundType.allCases) { sound in
-                            Button {
-                                viewModel.selectSound(sound)
-                            } label: {
-                                VStack(spacing: 4) {
-                                    Image(systemName: sound.systemImage)
-                                        .font(.title3)
-                                    Text(sound.rawValue)
-                                        .font(.caption2)
-                                }
-                                .frame(width: 64, height: 56)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(viewModel.selectedSound == sound
-                                              ? Color.indigo
-                                              : Color.white.opacity(0.08))
-                                )
-                                .foregroundStyle(.white)
-                            }
+                            SoundButton(
+                                sound: sound,
+                                isSelected: viewModel.selectedSound == sound,
+                                isPremium: sound.isPremium,
+                                isUnlocked: viewModel.isUnlocked,
+                                onTap: { viewModel.selectSound(sound) },
+                                onPaywallTap: { showPaywall = true }
+                            )
                         }
                     }
                 }
@@ -126,9 +117,20 @@ struct BedtimeView: View {
         .sheet(isPresented: $showMemo) {
             MemoView(memo: $viewModel.memo)
         }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
         .interactiveDismissDisabled(true)
+        .alert("保存エラー", isPresented: Binding(
+            get: { viewModel.dbError != nil },
+            set: { if !$0 { viewModel.dbError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.dbError ?? "")
+        }
         .alert("本当に起きた？", isPresented: $showWakeConfirm) {
-            Button("起きた！", role: .destructive) {
+            Button("起きた！") {
                 viewModel.finish()
                 dismiss()
             }
@@ -139,6 +141,62 @@ struct BedtimeView: View {
         }
         .onDisappear {
             viewModel.finish()
+        }
+    }
+}
+
+// MARK: - 自然音ボタン（プレミアムロック対応）
+
+/// デザイン仕様:
+/// - 無料音（なし・雨）: そのまま選択可
+/// - プレミアム音（波・森）: ロックアイコンをオーバーレイ表示、タップでペイウォールへ
+private struct SoundButton: View {
+    let sound: BedtimeViewModel.SoundType
+    let isSelected: Bool
+    let isPremium: Bool
+    let isUnlocked: Bool
+    let onTap: () -> Void
+    let onPaywallTap: () -> Void
+
+    private var isLocked: Bool { isPremium && !isUnlocked }
+
+    var body: some View {
+        Button {
+            if isLocked {
+                onPaywallTap()
+            } else {
+                onTap()
+            }
+        } label: {
+            ZStack(alignment: .topTrailing) {
+                VStack(spacing: 4) {
+                    Image(systemName: sound.systemImage)
+                        .font(.title3)
+                    Text(sound.rawValue)
+                        .font(.caption2)
+                }
+                .frame(width: 64, height: 56)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(isSelected && !isLocked
+                              ? Color.indigo
+                              : Color.white.opacity(0.08))
+                )
+                .foregroundStyle(isLocked ? .white.opacity(0.35) : .white)
+
+                // ロックバッジ
+                if isLocked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(4)
+                        .background(
+                            Circle()
+                                .fill(Color.indigo.opacity(0.85))
+                        )
+                        .offset(x: 4, y: -4)
+                }
+            }
         }
     }
 }
