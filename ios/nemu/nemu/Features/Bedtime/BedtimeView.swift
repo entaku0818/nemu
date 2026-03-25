@@ -8,6 +8,7 @@ import SwiftData
 import Combine
 
 struct BedtimeView: View {
+    let alarmTime: Date
     @State private var viewModel = BedtimeViewModel()
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -183,7 +184,7 @@ struct BedtimeView: View {
         }
         .onAppear {
             bedStartTime = Date()
-            viewModel.startSession(modelContext: modelContext)
+            viewModel.startSession(modelContext: modelContext, wakeTime: alarmTime)
         }
         .onDisappear {
             viewModel.finish()
@@ -287,5 +288,5 @@ struct MemoView: View {
 }
 
 #Preview {
-    BedtimeView()
+    BedtimeView(alarmTime: Calendar.current.date(bySettingHour: 7, minute: 0, second: 0, of: Date()) ?? Date())
 }

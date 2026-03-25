@@ -115,7 +115,15 @@ struct HomeView: View {
             viewModel.setup(modelContext: modelContext)
         }
         .fullScreenCover(isPresented: $viewModel.isBedtimeMode) {
-            BedtimeView()
+            BedtimeView(alarmTime: viewModel.wakeTime)
+        }
+        .alert("保存エラー", isPresented: Binding(
+            get: { viewModel.dbError != nil },
+            set: { if !$0 { viewModel.dbError = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.dbError ?? "")
         }
     }
 }
