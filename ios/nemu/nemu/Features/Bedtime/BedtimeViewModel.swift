@@ -145,7 +145,11 @@ final class BedtimeViewModel {
         isFinished = true
         restoreScreen()
         endSession()
-        NotificationCenter.default.post(name: .didWakeUp, object: nil)
+        NotificationCenter.default.post(
+            name: .didWakeUp,
+            object: nil,
+            userInfo: ["score": lastScore, "duration": lastDuration]
+        )
     }
 
     /// 記録を保存せずにセッションを破棄する（緊急終了用）

@@ -5,6 +5,7 @@
 
 import SwiftUI
 import SwiftData
+import Combine
 
 struct BedtimeView: View {
     @State private var viewModel = BedtimeViewModel()
@@ -15,7 +16,6 @@ struct BedtimeView: View {
     @State private var showWakeConfirm = false
     @State private var showQuitConfirm = false
     @State private var showPaywall = false
-    @State private var showWakeResult = false
     @State private var bedStartTime = Date()
     @State private var elapsedTime: TimeInterval = 0
     private let elapsedTimer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
@@ -153,13 +153,6 @@ struct BedtimeView: View {
         .sheet(isPresented: $showPaywall) {
             PaywallView()
         }
-        .fullScreenCover(isPresented: $showWakeResult) {
-            WakeResultView(
-                score: viewModel.lastScore,
-                duration: viewModel.lastDuration,
-                onDismiss: { dismiss() }
-            )
-        }
         .interactiveDismissDisabled(true)
         .alert("保存エラー", isPresented: Binding(
             get: { viewModel.dbError != nil },
@@ -172,7 +165,7 @@ struct BedtimeView: View {
         .alert("本当に起きた？", isPresented: $showWakeConfirm) {
             Button("起きた！") {
                 viewModel.finish()
-                showWakeResult = true
+                dismiss()
             }
             Button("まだ寝る", role: .cancel) {}
         }
@@ -199,120 +192,6 @@ struct BedtimeView: View {
 }
 
 // MARK: - 起床後スコア表示
-
-struct WakeResultView: View {
-    let score: Int
-    let duration: TimeInterval
-    let onDismiss: () -> Void
-
-    private var grade: String {
-        switch score {
-        case 80...: return "とても良い"
-        case 60..<80: return "良い"
-        case 40..<60: return "普通"
-        default: return "改善できそう"
-        }
-    }
-
-    private var comment: String {
-        switch score {
-        case 80...: return "よく眠れました！"
-        case 60..<80: return "いい睡眠でした"
-        case 40..<60: return "お疲れさまでした"
-        default: return "明日はもっとよく眠れます"
-        }
-    }
-
-    private var gradeColor: Color {
-        switch score {
-        case 80...: return .green
-        case 60..<80: return .indigo
-        case 40..<60: return Color.assetGold
-        default: return .orange
-        }
-    }
-
-    private var durationFormatted: String {
-        let hours = Int(duration) / 3600
-        let minutes = (Int(duration) % 3600) / 60
-        return "\(hours)時間\(minutes)分"
-    }
-
-    var body: some View {
-        ZStack {
-            Color.appBackground.ignoresSafeArea()
-
-            VStack(spacing: 32) {
-                Spacer()
-
-                Image(systemName: "sun.max.fill")
-                    .font(.system(size: 48))
-                    .foregroundStyle(.yellow.opacity(0.8))
-
-                Text(comment)
-                    .font(.title3)
-                    .foregroundStyle(.white.opacity(0.7))
-
-                // スコア
-                VStack(spacing: 8) {
-                    HStack(alignment: .bottom, spacing: 4) {
-                        Text("\(score)")
-                            .font(.system(size: 96, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                        Text("/ 100")
-                            .font(.title2)
-                            .foregroundStyle(.white.opacity(0.35))
-                            .padding(.bottom, 12)
-                    }
-                    Text(grade)
-                        .font(.headline)
-                        .foregroundStyle(gradeColor)
-                }
-
-                // 睡眠時間
-                HStack(spacing: 8) {
-                    Image(systemName: "moon.fill")
-                        .foregroundStyle(.indigo)
-                    Text(durationFormatted)
-                        .font(.subheadline)
-                        .foregroundStyle(.white.opacity(0.6))
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
-                .background(Capsule().fill(Color.white.opacity(0.07)))
-
-                Spacer()
-
-                VStack(spacing: 12) {
-                    Button {
-                        onDismiss()
-                    } label: {
-                        Label("レポートを見る", systemImage: "chart.bar.fill")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 18)
-                            .background(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(Color.indigo.gradient)
-                            )
-                    }
-
-                    Button {
-                        onDismiss()
-                    } label: {
-                        Text("閉じる")
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.4))
-                            .underline()
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 40)
-            }
-        }
-    }
-}
 
 // MARK: - 自然音ボタン（プレミアムロック対応）
 

@@ -108,9 +108,9 @@ struct PaywallView: View {
 
                         // プレミアム特典リスト
                         VStack(spacing: 12) {
-                            FeatureRow(icon: "waveform",                   text: "全ての自然音が使い放題")
-                            FeatureRow(icon: "chart.line.uptrend.xyaxis",  text: "30日以上の詳細な睡眠履歴")
-                            FeatureRow(icon: "bell.badge.fill",            text: "スマートアラームで最適覚醒")
+                            PaywallFeatureRow(icon: "waveform",                   text: "全ての自然音が使い放題")
+                            PaywallFeatureRow(icon: "chart.line.uptrend.xyaxis",  text: "30日以上の詳細な睡眠履歴")
+                            PaywallFeatureRow(icon: "bell.badge.fill",            text: "スマートアラームで最適覚醒")
                         }
                         .padding(.horizontal)
 
@@ -415,7 +415,7 @@ private struct PlanCard: View {
 
 // MARK: - 特典行
 
-private struct FeatureRow: View {
+private struct PaywallFeatureRow: View {
     let icon: String
     let text: String
 
