@@ -19,6 +19,7 @@ struct BedtimeView: View {
     @State private var showPaywall = false
     @State private var bedStartTime = Date()
     @State private var elapsedTime: TimeInterval = 0
+    @State private var showDebugToast = false
     private let elapsedTimer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     private var elapsedTimeText: String {
@@ -68,10 +69,17 @@ struct BedtimeView: View {
 
                 Spacer()
 
-                // 月アイコン
+                // 月アイコン（3連打でデバッグ用モーションカウント +1）
                 Image(systemName: "moon.stars.fill")
                     .font(.system(size: 80))
                     .foregroundStyle(.indigo.opacity(0.6))
+                    .onTapGesture(count: 3) {
+                        SleepMonitorService.shared.motionEventCount += 1
+                        showDebugToast = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            showDebugToast = false
+                        }
+                    }
 
                 Text("おやすみなさい")
                     .font(.title3)
@@ -82,6 +90,16 @@ struct BedtimeView: View {
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.25))
                         .monospacedDigit()
+                }
+
+                if showDebugToast {
+                    Text("体動カウント: \(SleepMonitorService.shared.motionEventCount)")
+                        .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.5))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(Color.white.opacity(0.08)))
+                        .transition(.opacity)
                 }
 
                 Spacer()
