@@ -55,7 +55,12 @@ struct MainTabView: View {
         .onReceive(NotificationCenter.default.publisher(for: .didWakeUp)) { notification in
             wakeScore = notification.userInfo?["score"] as? Int ?? 0
             wakeDuration = notification.userInfo?["duration"] as? TimeInterval ?? 0
-            showWakeResult = true
+            // 30分未満のセッションはスコア画面を出さずそのままReportへ
+            if wakeDuration >= 1800 {
+                showWakeResult = true
+            } else {
+                selectedTab = 1
+            }
             showBanner()
         }
     }
