@@ -9,6 +9,9 @@ import SwiftData
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = HomeViewModel()
+    #if DEBUG
+    @State private var showScreenshotPreview = false
+    #endif
 
     private let dayLabels = ["日", "月", "火", "水", "木", "金", "土"]
 
@@ -25,6 +28,11 @@ struct HomeView: View {
                     Image(systemName: "moon.stars.fill")
                         .font(.system(size: 48))
                         .foregroundStyle(.indigo.gradient)
+                        #if DEBUG
+                        .onLongPressGesture {
+                            showScreenshotPreview = true
+                        }
+                        #endif
 
                     Text("ねむ")
                         .font(.title2.bold())
@@ -114,6 +122,11 @@ struct HomeView: View {
         .onAppear {
             viewModel.setup(modelContext: modelContext)
         }
+        #if DEBUG
+        .sheet(isPresented: $showScreenshotPreview) {
+            ScreenshotPreviewView()
+        }
+        #endif
         .fullScreenCover(isPresented: $viewModel.isBedtimeMode) {
             BedtimeView(alarmTime: viewModel.wakeTime)
         }
