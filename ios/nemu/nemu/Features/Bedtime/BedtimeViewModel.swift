@@ -63,7 +63,7 @@ final class BedtimeViewModel {
     private func playGeneratedSound(_ type: SoundType) {
         let engine = AVAudioEngine()
         let sampleRate = 44100.0
-        let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!
+        guard let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1) else { return }
 
         // AVAudioSourceNode でリアルタイム生成
         var brownPrev: Float = 0
