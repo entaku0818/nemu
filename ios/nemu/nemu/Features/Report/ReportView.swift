@@ -68,7 +68,7 @@ struct ReportView: View {
 // MARK: - 累計資産バッジ
 
 /// ヘッダー右に表示：「累計○○時間の睡眠資産」で継続モチベーションを強化
-private struct TotalAssetBadge: View {
+struct TotalAssetBadge: View {
     let totalHours: Int
 
     var body: some View {
