@@ -121,6 +121,9 @@ struct HomeView: View {
         }
         .onAppear {
             viewModel.setup(modelContext: modelContext)
+            // 就寝前に位置情報を先行取得。フォアグラウンド中に完了させることで
+            // WhenInUse権限のまま日の出計算を確実に行う。
+            SleepMonitorService.shared.prepareForSleep()
         }
         #if DEBUG
         .sheet(isPresented: $showScreenshotPreview) {

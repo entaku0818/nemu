@@ -43,6 +43,16 @@ final class SleepMonitorService: NSObject {
         locationManager.delegate = self
     }
 
+    // MARK: - 就寝前の準備（HomeViewのonAppearから呼ぶ）
+
+    /// 就寝モード開始前に位置情報を先行取得する。
+    /// BedtimeView表示前にフォアグラウンドで呼ぶことで、
+    /// WhenInUse権限のまま確実に日の出時刻を取得できる。
+    func prepareForSleep() {
+        guard sunriseDate == nil else { return }
+        requestLocationForSunrise()
+    }
+
     // MARK: - 開始
 
     func startMonitoring(bedTime: Date) {
@@ -52,7 +62,10 @@ final class SleepMonitorService: NSObject {
 
         startMotionMonitoring()
         startBrightnessMonitoring()
-        requestLocationForSunrise()
+        // prepareForSleep()で取得済みの場合は再取得しない
+        if sunriseDate == nil {
+            requestLocationForSunrise()
+        }
     }
 
     // MARK: - 停止
@@ -73,8 +86,9 @@ final class SleepMonitorService: NSObject {
         motionManager.startActivityUpdates(to: .main) { [weak self] activity in
             guard let self, let activity else { return }
             Task { @MainActor in
-                // 静止→動きに変わったらカウント
-                if activity.walking || activity.running || activity.unknown {
+                // 明確な動き（walking/running）のみカウント。
+                // unknown は静止中でも発生するため除外し、誤カウントを防ぐ。
+                if activity.walking || activity.running {
                     self.motionEventCount += 1
                 }
             }
@@ -99,19 +113,29 @@ final class SleepMonitorService: NSObject {
     }
 
     private func calculateSunrise(for location: CLLocation) {
-        // 今日の日の出時刻を計算（Solar noon approximation）
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
 
-        // 簡易計算: 緯度から日の出時刻を近似
         let latitude = location.coordinate.latitude
+        let longitude = location.coordinate.longitude
         let dayOfYear = calendar.ordinality(of: .day, in: .year, for: today) ?? 172
-        let declination = 23.45 * sin(Double(dayOfYear - 81) * 360 / 365 * .pi / 180)
-        let hourAngle = acos(-tan(latitude * .pi / 180) * tan(declination * .pi / 180)) * 180 / .pi
-        let sunriseHour = 12.0 - hourAngle / 15.0
 
-        if let sunrise = calendar.date(bySettingHour: Int(sunriseHour),
-                                        minute: Int((sunriseHour.truncatingRemainder(dividingBy: 1)) * 60),
+        // 太陽赤緯（度）
+        let declination = 23.45 * sin(Double(dayOfYear - 81) * 360 / 365 * .pi / 180)
+        // 時角（度）: 地平線での太陽角度から計算
+        let hourAngle = acos(-tan(latitude * .pi / 180) * tan(declination * .pi / 180)) * 180 / .pi
+
+        // UTC基準の日の出時刻 = 正午UTC - 経度補正 - 時角
+        let sunriseUTC = 12.0 - longitude / 15.0 - hourAngle / 15.0
+        // デバイスのタイムゾーンオフセットを加算してローカル時刻へ変換
+        let timezoneOffset = Double(TimeZone.current.secondsFromGMT()) / 3600.0
+        let sunriseLocal = sunriseUTC + timezoneOffset
+
+        let hour = Int(sunriseLocal) % 24
+        let minute = Int((sunriseLocal - Double(Int(sunriseLocal))) * 60)
+
+        if let sunrise = calendar.date(bySettingHour: max(0, hour),
+                                        minute: max(0, minute),
                                         second: 0, of: today) {
             self.sunriseDate = sunrise
         }
