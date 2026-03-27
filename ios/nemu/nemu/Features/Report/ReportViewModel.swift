@@ -51,6 +51,17 @@ final class ReportViewModel {
         }
     }
 
+    // MARK: - 累計睡眠時間（資産総量）
+
+    /// 全セッションの合計睡眠時間（時間単位・切り捨て）
+    var totalSleepHours: Int {
+        let totalSeconds = allSessions.compactMap { session -> TimeInterval? in
+            guard let wake = session.wakeTime else { return nil }
+            return wake.timeIntervalSince(session.bedTime)
+        }.reduce(0, +)
+        return Int(totalSeconds / 3600)
+    }
+
     // MARK: - 週間グラフ用データ
 
     var weeklyScores: [(date: Date, score: Int)] {

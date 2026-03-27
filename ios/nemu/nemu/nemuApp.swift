@@ -12,6 +12,11 @@ import SwiftData
 struct nemuApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
+    init() {
+        // TODO: RevenueCat SPM追加後、ダッシュボードで取得した API キーを設定する
+        // PurchaseService.shared.configure(apiKey: "YOUR_REVENUECAT_API_KEY")
+    }
+
     var body: some Scene {
         WindowGroup {
             if hasCompletedOnboarding {

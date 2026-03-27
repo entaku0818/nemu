@@ -9,7 +9,6 @@ import AVFoundation
 import UIKit
 import SwiftData
 import CoreMotion
-import UserNotifications
 
 @Observable
 @MainActor
@@ -160,11 +159,6 @@ final class BedtimeViewModel {
         }
         self.currentSession = session
         SleepMonitorService.shared.startMonitoring(bedTime: now)
-
-        // アラーム時刻にリマインド通知をスケジュール
-        if let wakeTime {
-            scheduleWakeReminder(at: wakeTime)
-        }
     }
 
     func endSession() {
@@ -227,7 +221,6 @@ final class BedtimeViewModel {
         guard !isFinished else { return }
         isFinished = true
         restoreScreen()
-        cancelWakeReminder()
         endSession()
         // 通知は endSession() 内の非同期処理後に投稿される
     }
@@ -238,44 +231,12 @@ final class BedtimeViewModel {
         isFinished = true
         stopAudio()
         restoreScreen()
-        cancelWakeReminder()
         if let session = currentSession, let context = modelContext {
             currentSession = nil
             context.delete(session)
             try? context.save()
         }
         SleepMonitorService.shared.stopMonitoring()
-    }
-
-    // MARK: - 起床リマインド通知
-
-    private static let wakeReminderID = "com.entaku.nemu.wakeReminder"
-
-    private func scheduleWakeReminder(at alarmTime: Date) {
-        Task {
-            let center = UNUserNotificationCenter.current()
-            // 権限リクエスト（すでに許可済みなら即座に true が返る）
-            guard (try? await center.requestAuthorization(options: [.alert, .sound])) == true else { return }
-
-            let content = UNMutableNotificationContent()
-            content.title = "おはようございます ☀️"
-            content.body = "「起きた！」を押して睡眠を記録しましょう"
-            content.sound = .default
-
-            let components = Calendar.current.dateComponents([.hour, .minute], from: alarmTime)
-            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
-            let request = UNNotificationRequest(
-                identifier: Self.wakeReminderID,
-                content: content,
-                trigger: trigger
-            )
-            try? await center.add(request)
-        }
-    }
-
-    private func cancelWakeReminder() {
-        UNUserNotificationCenter.current()
-            .removePendingNotificationRequests(withIdentifiers: [Self.wakeReminderID])
     }
 }
 

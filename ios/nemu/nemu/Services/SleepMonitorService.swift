@@ -22,14 +22,15 @@ final class SleepMonitorService: NSObject {
     var sunriseDate: Date?
     var isMonitoring: Bool = false
 
-    // 3条件トリガー
+    // 2条件トリガー（日の出前後30分 AND 体動3回以上）
+    // NOTE: brightening（画面輝度）はロック画面中に取得不可のため条件から除外。
+    // currentBrightness は将来的に LightSensor API が利用可能になった際に再追加を検討。
     var shouldWake: Bool {
         guard isMonitoring, let sunrise = sunriseDate else { return false }
         let now = Date()
         let nearSunrise = abs(now.timeIntervalSince(sunrise)) < 30 * 60
         let movingMore = motionEventCount > 3
-        let brightening = currentBrightness > 0.15
-        return nearSunrise && movingMore && brightening
+        return nearSunrise && movingMore
     }
 
     private let motionManager = CMMotionActivityManager()

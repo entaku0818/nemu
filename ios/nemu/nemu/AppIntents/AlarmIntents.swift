@@ -13,8 +13,10 @@ struct WakeUpIntent: AppIntent, LiveActivityIntent {
     static let title: LocalizedStringResource = "起きた！"
 
     func perform() async throws -> some IntentResult {
+        // AlarmKit経由での起床フラグを保存（アプリ未起動時の復元用）
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "alarmKitWakeTimestamp")
         await MainActor.run {
-            NotificationCenter.default.post(name: .didWakeUp, object: nil)
+            NotificationCenter.default.post(name: .alarmKitDidFire, object: nil)
         }
         return .result()
     }
@@ -36,4 +38,6 @@ struct SnoozeIntent: AppIntent, LiveActivityIntent {
 
 extension Notification.Name {
     static let didWakeUp = Notification.Name("com.entaku.nemu.didWakeUp")
+    /// AlarmKit の「起きた！」ボタンが押されたとき（スコア計算前）
+    static let alarmKitDidFire = Notification.Name("com.entaku.nemu.alarmKitDidFire")
 }

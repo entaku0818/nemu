@@ -200,9 +200,21 @@ struct BedtimeView: View {
         .onReceive(elapsedTimer) { _ in
             elapsedTime = Date().timeIntervalSince(bedStartTime)
         }
+        .onReceive(NotificationCenter.default.publisher(for: .alarmKitDidFire)) { _ in
+            // AlarmKit の「起きた！」ボタン → 確認不要でそのまま終了
+            viewModel.finish()
+            dismiss()
+        }
         .onAppear {
             bedStartTime = Date()
             viewModel.startSession(modelContext: modelContext, wakeTime: alarmTime)
+            // アプリ未起動中にAlarmKitで起床した場合の復元
+            let pendingKey = "alarmKitWakeTimestamp"
+            if UserDefaults.standard.double(forKey: pendingKey) > 0 {
+                UserDefaults.standard.removeObject(forKey: pendingKey)
+                viewModel.finish()
+                dismiss()
+            }
         }
         .onDisappear {
             viewModel.finish()
