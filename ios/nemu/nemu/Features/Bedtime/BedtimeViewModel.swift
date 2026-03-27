@@ -14,9 +14,6 @@ import CoreMotion
 @MainActor
 final class BedtimeViewModel {
 
-    // MARK: - メモ
-    var memo: String = ""
-
     // MARK: - DBエラー
     var dbError: String?
 

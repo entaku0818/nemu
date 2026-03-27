@@ -13,7 +13,6 @@ struct BedtimeView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var isDimmed = false
-    @State private var showMemo = false
     @State private var showWakeConfirm = false
     @State private var showQuitConfirm = false
     @State private var showPaywall = false
@@ -56,13 +55,8 @@ struct BedtimeView: View {
 
                     Spacer()
 
-                    Button {
-                        showMemo.toggle()
-                    } label: {
-                        Image(systemName: "square.and.pencil")
-                            .font(.title3)
-                            .foregroundStyle(.white.opacity(0.5))
-                    }
+                    // レイアウトバランス用
+                    Color.clear.frame(width: 24, height: 24)
                 }
                 .padding(.horizontal)
                 .padding(.top)
@@ -165,9 +159,6 @@ struct BedtimeView: View {
                 .padding(.horizontal)
                 .padding(.bottom, 32)
             }
-        }
-        .sheet(isPresented: $showMemo) {
-            MemoView(memo: $viewModel.memo)
         }
         .sheet(isPresented: $showPaywall) {
             PaywallView()
@@ -280,42 +271,6 @@ private struct SoundButton: View {
     }
 }
 
-// MARK: - メモシート
-
-struct MemoView: View {
-    @Binding var memo: String
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        ZStack {
-            Color(red: 0.06, green: 0.06, blue: 0.12).ignoresSafeArea()
-
-            VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Text("今日のメモ")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                    Spacer()
-                    Button("完了") { dismiss() }
-                        .foregroundStyle(.indigo)
-                }
-                .padding()
-
-                Text("ストレス・感謝・気になること、なんでも")
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.4))
-                    .padding(.horizontal)
-
-                TextEditor(text: $memo)
-                    .scrollContentBackground(.hidden)
-                    .background(Color.clear)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal)
-                    .frame(maxHeight: .infinity)
-            }
-        }
-    }
-}
 
 #Preview {
     BedtimeView(alarmTime: Calendar.current.date(bySettingHour: 7, minute: 0, second: 0, of: Date()) ?? Date())
