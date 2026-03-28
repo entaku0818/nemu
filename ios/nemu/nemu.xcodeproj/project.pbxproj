@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		61E5A9EE2F7756890002D8D5 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 65DA4E70E5F848C5A695D2E9 /* GoogleMobileAds */; };
+		FBA004FF2F7800000000D8D5 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = FBA002FF2F7800000000D8D5 /* FirebaseAnalytics */; };
+		FBA005FF2F7800000000D8D5 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = FBA003FF2F7800000000D8D5 /* FirebaseCrashlytics */; };
+		61E5AAEC2F7778B20002D8D5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E5AAEB2F7778B20002D8D5 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +34,7 @@
 		61C83B182F5D7A2B00D24258 /* nemu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = nemu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61C83B252F5D7A2D00D24258 /* nemuTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = nemuTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		61C83B2F2F5D7A2D00D24258 /* nemuUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = nemuUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		61E5AAEB2F7778B20002D8D5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -57,6 +61,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				61E5A9EE2F7756890002D8D5 /* GoogleMobileAds in Frameworks */,
+				FBA004FF2F7800000000D8D5 /* FirebaseAnalytics in Frameworks */,
+				FBA005FF2F7800000000D8D5 /* FirebaseCrashlytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,6 +90,7 @@
 				61C83B282F5D7A2D00D24258 /* nemuTests */,
 				61C83B322F5D7A2D00D24258 /* nemuUITests */,
 				61C83B192F5D7A2B00D24258 /* Products */,
+				61E5AAEB2F7778B20002D8D5 /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -118,6 +125,8 @@
 			name = nemu;
 			packageProductDependencies = (
 				65DA4E70E5F848C5A695D2E9 /* GoogleMobileAds */,
+				FBA002FF2F7800000000D8D5 /* FirebaseAnalytics */,
+				FBA003FF2F7800000000D8D5 /* FirebaseCrashlytics */,
 			);
 			productName = nemu;
 			productReference = 61C83B182F5D7A2B00D24258 /* nemu.app */;
@@ -203,6 +212,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				193A0273AD95495FA7F5DB75 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+				FBA001FF2F7800000000D8D5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 61C83B192F5D7A2B00D24258 /* Products */;
@@ -221,6 +231,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61E5AAEC2F7778B20002D8D5 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -605,6 +616,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		FBA001FF2F7800000000D8D5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
 		193A0273AD95495FA7F5DB75 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads";
@@ -616,6 +635,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		FBA002FF2F7800000000D8D5 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FBA001FF2F7800000000D8D5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		FBA003FF2F7800000000D8D5 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FBA001FF2F7800000000D8D5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
 		65DA4E70E5F848C5A695D2E9 /* GoogleMobileAds */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 193A0273AD95495FA7F5DB75 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
