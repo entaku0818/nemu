@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		61E5A9EE2F7756890002D8D5 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 65DA4E70E5F848C5A695D2E9 /* GoogleMobileAds */; };
+		61E5AAEC2F7778B20002D8D5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E5AAEB2F7778B20002D8D5 /* GoogleService-Info.plist */; };
 		FBA004FF2F7800000000D8D5 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = FBA002FF2F7800000000D8D5 /* FirebaseAnalytics */; };
 		FBA005FF2F7800000000D8D5 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = FBA003FF2F7800000000D8D5 /* FirebaseCrashlytics */; };
-		61E5AAEC2F7778B20002D8D5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E5AAEB2F7778B20002D8D5 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -105,6 +105,7 @@
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
+
 
 /* Begin PBXNativeTarget section */
 		61C83B172F5D7A2B00D24258 /* nemu */ = {
@@ -419,20 +420,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4YZQY4C47E;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_GADApplicationIdentifier = "ca-app-pub-3940256099942544~1458002511";
-				INFOPLIST_KEY_NSAlarmKitUsageDescription = "ねむは、設定した起床時刻にサイレントモードでも確実にアラームを鳴らすために使用します。";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "睡眠データを記録・分析するために使用します。";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "睡眠データをヘルスケアアプリに保存するために使用します。";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "日の出時刻を取得して、自然な目覚めをサポートするために使用します。";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "就寝中の騒音レベルを検知して、睡眠環境を分析するために使用します。";
-				INFOPLIST_KEY_NSMotionUsageDescription = "睡眠中の動きを検知して、最適な起床タイミングをお知らせするために使用します。";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = "location fetch processing";
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "nemu-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -459,20 +448,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4YZQY4C47E;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_GADApplicationIdentifier = "ca-app-pub-3940256099942544~1458002511";
-				INFOPLIST_KEY_NSAlarmKitUsageDescription = "ねむは、設定した起床時刻にサイレントモードでも確実にアラームを鳴らすために使用します。";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "睡眠データを記録・分析するために使用します。";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "睡眠データをヘルスケアアプリに保存するために使用します。";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "日の出時刻を取得して、自然な目覚めをサポートするために使用します。";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "就寝中の騒音レベルを検知して、睡眠環境を分析するために使用します。";
-				INFOPLIST_KEY_NSMotionUsageDescription = "睡眠中の動きを検知して、最適な起床タイミングをお知らせするために使用します。";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = "location fetch processing";
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "nemu-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -616,14 +593,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		FBA001FF2F7800000000D8D5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 11.0.0;
-			};
-		};
 		193A0273AD95495FA7F5DB75 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads";
@@ -632,9 +601,22 @@
 				minimumVersion = 11.0.0;
 			};
 		};
+		FBA001FF2F7800000000D8D5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		65DA4E70E5F848C5A695D2E9 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 193A0273AD95495FA7F5DB75 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
 		FBA002FF2F7800000000D8D5 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = FBA001FF2F7800000000D8D5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
@@ -644,11 +626,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = FBA001FF2F7800000000D8D5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
-		};
-		65DA4E70E5F848C5A695D2E9 /* GoogleMobileAds */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 193A0273AD95495FA7F5DB75 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
-			productName = GoogleMobileAds;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
