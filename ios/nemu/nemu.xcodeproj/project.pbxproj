@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		61E5A9EE2F7756890002D8D5 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 65DA4E70E5F848C5A695D2E9 /* GoogleMobileAds */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		61C83B262F5D7A2D00D24258 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				61E5A9EE2F7756890002D8D5 /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = nemu;
 			packageProductDependencies = (
+				65DA4E70E5F848C5A695D2E9 /* GoogleMobileAds */,
 			);
 			productName = nemu;
 			productReference = 61C83B182F5D7A2B00D24258 /* nemu.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = 61C83B0F2F5D7A2B00D24258;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				193A0273AD95495FA7F5DB75 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 61C83B192F5D7A2B00D24258 /* Products */;
 			projectDirPath = "";
@@ -400,6 +409,7 @@
 				DEVELOPMENT_TEAM = 4YZQY4C47E;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_GADApplicationIdentifier = "ca-app-pub-3940256099942544~1458002511";
 				INFOPLIST_KEY_NSAlarmKitUsageDescription = "ねむは、設定した起床時刻にサイレントモードでも確実にアラームを鳴らすために使用します。";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "睡眠データを記録・分析するために使用します。";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "睡眠データをヘルスケアアプリに保存するために使用します。";
@@ -439,6 +449,7 @@
 				DEVELOPMENT_TEAM = 4YZQY4C47E;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_GADApplicationIdentifier = "ca-app-pub-3940256099942544~1458002511";
 				INFOPLIST_KEY_NSAlarmKitUsageDescription = "ねむは、設定した起床時刻にサイレントモードでも確実にアラームを鳴らすために使用します。";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "睡眠データを記録・分析するために使用します。";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "睡眠データをヘルスケアアプリに保存するために使用します。";
@@ -592,6 +603,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		193A0273AD95495FA7F5DB75 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		65DA4E70E5F848C5A695D2E9 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 193A0273AD95495FA7F5DB75 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 61C83B102F5D7A2B00D24258 /* Project object */;
 }

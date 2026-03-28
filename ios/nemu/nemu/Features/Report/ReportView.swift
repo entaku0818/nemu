@@ -55,6 +55,17 @@ struct ReportView: View {
                     Spacer(minLength: 40)
                 }
             }
+
+            // バナー広告（非プレミアムユーザーのみ、画面下部固定）
+            if !PurchaseService.shared.isPremium {
+                VStack {
+                    Spacer()
+                    BannerAdView()
+                        .frame(height: 50)
+                        .background(Color.appBackground)
+                }
+                .ignoresSafeArea(edges: .bottom)
+            }
         }
         .onAppear {
             viewModel.setup(modelContext: modelContext)
