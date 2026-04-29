@@ -235,7 +235,7 @@ private struct CompactScoreCard: View {
                 Text(grade)
                     .font(.caption.bold())
                     .foregroundStyle(gradeColor)
-                Text("昨夜 · \(session.durationFormatted)")
+                Text("\(session.dateLabel) · \(session.durationFormatted)")
                     .font(.caption2)
                     .foregroundStyle(.white.opacity(0.35))
             }

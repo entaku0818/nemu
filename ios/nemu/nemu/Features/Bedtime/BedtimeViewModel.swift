@@ -104,7 +104,7 @@ final class BedtimeViewModel {
         engine.connect(srcNode, to: engine.mainMixerNode, format: format)
 
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .mixWithOthers])
             try AVAudioSession.sharedInstance().setActive(true)
             try engine.start()
             audioEngine = engine
@@ -120,15 +120,18 @@ final class BedtimeViewModel {
     }
 
     // MARK: - 画面減光
-    private var originalBrightness: CGFloat = UIScreen.main.brightness
+    private var originalBrightness: CGFloat = 0.5
 
     func dimScreen() {
-        originalBrightness = UIScreen.main.brightness
-        UIScreen.main.brightness = 0.02
+        let screen = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }.first?.screen
+        originalBrightness = screen?.brightness ?? 0.5
+        screen?.brightness = 0.02
     }
 
     func restoreScreen() {
-        UIScreen.main.brightness = originalBrightness
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }.first?.screen.brightness = originalBrightness
     }
 
     // MARK: - SleepSession記録
@@ -173,11 +176,12 @@ final class BedtimeViewModel {
             let mgr = CMMotionActivityManager()
             mgr.queryActivityStarting(from: bedTime, to: wakeTime, to: .main) { [weak self] activities, _ in
                 guard let self else { return }
-                // stationary 以外（明確な動き）をカウント
-                let count = activities?.filter {
+                let motionActivities = activities?.filter {
                     !$0.stationary && ($0.walking || $0.running || $0.cycling || $0.automotive)
-                }.count ?? 0
-                session.motionEventCount = count
+                } ?? []
+                session.motionEventCount = motionActivities.count
+                session.motionTimestamps = motionActivities.map { $0.startDate }
+                session.snoreTimestamps = SleepMonitorService.shared.snoreTimestamps
                 session.calculateScore()
                 self.lastScore = session.score
                 self.lastDuration = session.duration
@@ -196,6 +200,8 @@ final class BedtimeViewModel {
         } else {
             // CoreMotion 非対応デバイスはフォールバック
             session.motionEventCount = SleepMonitorService.shared.motionEventCount
+            session.motionTimestamps = SleepMonitorService.shared.motionTimestamps
+            session.snoreTimestamps = SleepMonitorService.shared.snoreTimestamps
             session.calculateScore()
             lastScore = session.score
             lastDuration = session.duration

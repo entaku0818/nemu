@@ -24,18 +24,67 @@ final class nemuUITests: XCTestCase {
 
     @MainActor
     func testExample() throws {
-        // UI tests must launch the application that they test.
         let app = XCUIApplication()
         app.launch()
-
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
 
     @MainActor
     func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
         measure(metrics: [XCTApplicationLaunchMetric()]) {
             XCUIApplication().launch()
+        }
+    }
+
+    // MARK: - App Store Screenshots
+
+    @MainActor
+    func testCaptureScreenshots() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["UI_SCREENSHOT_MODE"]
+        app.launch()
+
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "01_home"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+
+        // Navigate to Report tab
+        let reportTab = app.tabBars.buttons["レポート"]
+        if reportTab.exists {
+            reportTab.tap()
+            sleep(1)
+            let reportAttachment = XCTAttachment(screenshot: app.screenshot())
+            reportAttachment.name = "02_report"
+            reportAttachment.lifetime = .keepAlways
+            add(reportAttachment)
+        }
+
+        // Go back to home and tap 就寝する
+        let homeTab = app.tabBars.buttons["ホーム"]
+        if homeTab.exists {
+            homeTab.tap()
+            sleep(1)
+        }
+
+        let sleepButton = app.buttons["就寝する"]
+        if sleepButton.exists {
+            // Handle system permission dialogs via interruption monitor
+            addUIInterruptionMonitor(withDescription: "Permission dialog") { alert in
+                let allowBtn = alert.buttons["許可"]
+                if allowBtn.exists { allowBtn.tap(); return true }
+                let okBtn = alert.buttons["OK"]
+                if okBtn.exists { okBtn.tap(); return true }
+                return false
+            }
+            sleepButton.tap()
+            sleep(3)
+            // Interact with app to trigger interruption handler
+            app.tap()
+            sleep(2)
+            let bedtimeAttachment = XCTAttachment(screenshot: app.screenshot())
+            bedtimeAttachment.name = "03_bedtime"
+            bedtimeAttachment.lifetime = .keepAlways
+            add(bedtimeAttachment)
         }
     }
 }

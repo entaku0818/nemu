@@ -2,13 +2,14 @@
 //  SleepMonitorService.swift
 //  nemu
 //
-// 就寝中のセンサー監視（CoreMotion + CoreLocation + UIScreen）
+// 就寝中のセンサー監視（CoreMotion + CoreLocation + UIScreen + AVAudioEngine）
 //
 
 import Foundation
 import CoreMotion
 import CoreLocation
 import UIKit
+import AVFoundation
 import Observation
 
 @Observable
@@ -18,19 +19,19 @@ final class SleepMonitorService: NSObject {
 
     // MARK: - State
     var motionEventCount: Int = 0
+    var motionTimestamps: [Date] = []
+    var snoreTimestamps: [Date] = []
     var currentBrightness: CGFloat = 0
     var sunriseDate: Date?
     var isMonitoring: Bool = false
 
     // 2条件トリガー（日の出前後30分 AND 体動3回以上）
-    // NOTE: brightening（画面輝度）はロック画面中に取得不可のため条件から除外。
-    // currentBrightness は将来的に LightSensor API が利用可能になった際に再追加を検討。
     var shouldWake: Bool {
         guard isMonitoring, let sunrise = sunriseDate else { return false }
         let now = Date()
         let nearSunrise = abs(now.timeIntervalSince(sunrise)) < 30 * 60
-        let movingMore = motionEventCount > 3
-        return nearSunrise && movingMore
+        let effectiveCount = motionTimestamps.isEmpty ? motionEventCount : motionTimestamps.count
+        return nearSunrise && effectiveCount > 3
     }
 
     private let motionManager = CMMotionActivityManager()
@@ -38,16 +39,17 @@ final class SleepMonitorService: NSObject {
     private var brightnessTimer: Timer?
     private var bedTime: Date?
 
+    // いびき検知
+    private var snoreEngine: AVAudioEngine?
+    private var lastSnoreTime: Date?
+
     private override init() {
         super.init()
         locationManager.delegate = self
     }
 
-    // MARK: - 就寝前の準備（HomeViewのonAppearから呼ぶ）
+    // MARK: - 就寝前の準備
 
-    /// 就寝モード開始前に位置情報を先行取得する。
-    /// BedtimeView表示前にフォアグラウンドで呼ぶことで、
-    /// WhenInUse権限のまま確実に日の出時刻を取得できる。
     func prepareForSleep() {
         guard sunriseDate == nil else { return }
         requestLocationForSunrise()
@@ -58,11 +60,14 @@ final class SleepMonitorService: NSObject {
     func startMonitoring(bedTime: Date) {
         self.bedTime = bedTime
         self.motionEventCount = 0
+        self.motionTimestamps = []
+        self.snoreTimestamps = []
+        self.lastSnoreTime = nil
         self.isMonitoring = true
 
         startMotionMonitoring()
         startBrightnessMonitoring()
-        // prepareForSleep()で取得済みの場合は再取得しない
+        startSnoreMonitoring()
         if sunriseDate == nil {
             requestLocationForSunrise()
         }
@@ -76,33 +81,86 @@ final class SleepMonitorService: NSObject {
         brightnessTimer?.invalidate()
         brightnessTimer = nil
         locationManager.stopUpdatingLocation()
+        stopSnoreMonitoring()
     }
 
     // MARK: - CoreMotion
 
     private func startMotionMonitoring() {
         guard CMMotionActivityManager.isActivityAvailable() else { return }
-
         motionManager.startActivityUpdates(to: .main) { [weak self] activity in
             guard let self, let activity else { return }
             Task { @MainActor in
-                // 明確な動き（walking/running）のみカウント。
-                // unknown は静止中でも発生するため除外し、誤カウントを防ぐ。
                 if activity.walking || activity.running {
                     self.motionEventCount += 1
+                    self.motionTimestamps.append(Date())
                 }
             }
         }
     }
 
-    // MARK: - 画面輝度監視（朝の光の代替）
+    // MARK: - 画面輝度監視
 
     private func startBrightnessMonitoring() {
         brightnessTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
-                self?.currentBrightness = UIScreen.main.brightness
+                self?.currentBrightness = UIApplication.shared.connectedScenes
+                    .compactMap { $0 as? UIWindowScene }.first?.screen.brightness ?? 0
             }
         }
+    }
+
+    // MARK: - いびき検知（AVAudioEngine 入力タップ + RMS）
+
+    private func startSnoreMonitoring() {
+        let session = AVAudioSession.sharedInstance()
+        guard session.recordPermission == .granted else { return }
+
+        do {
+            try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .mixWithOthers])
+            try session.setActive(true)
+        } catch { return }
+
+        let engine = AVAudioEngine()
+        let inputNode = engine.inputNode
+        let format = inputNode.outputFormat(forBus: 0)
+
+        inputNode.installTap(onBus: 0, bufferSize: 4096, format: format) { [weak self] buffer, _ in
+            guard let self else { return }
+            let rms = Self.calculateRMS(buffer)
+            // 閾値 0.04 = 室内の中程度の音（いびき目安）
+            // 30秒以内の連続検知は同一イベントとしてまとめる
+            guard rms > 0.04 else { return }
+            Task { @MainActor in
+                let now = Date()
+                if let last = self.lastSnoreTime, now.timeIntervalSince(last) < 30 { return }
+                self.lastSnoreTime = now
+                self.snoreTimestamps.append(now)
+            }
+        }
+
+        do {
+            try engine.start()
+            snoreEngine = engine
+        } catch {
+            inputNode.removeTap(onBus: 0)
+            snoreEngine = nil
+        }
+    }
+
+    private func stopSnoreMonitoring() {
+        snoreEngine?.inputNode.removeTap(onBus: 0)
+        snoreEngine?.stop()
+        snoreEngine = nil
+        lastSnoreTime = nil
+    }
+
+    private static func calculateRMS(_ buffer: AVAudioPCMBuffer) -> Float {
+        guard let data = buffer.floatChannelData?[0] else { return 0 }
+        let count = Int(buffer.frameLength)
+        guard count > 0 else { return 0 }
+        let sum = (0..<count).reduce(Float(0)) { $0 + data[$1] * data[$1] }
+        return sqrt(sum / Float(count))
     }
 
     // MARK: - CoreLocation（日の出時刻）
@@ -120,14 +178,10 @@ final class SleepMonitorService: NSObject {
         let longitude = location.coordinate.longitude
         let dayOfYear = calendar.ordinality(of: .day, in: .year, for: today) ?? 172
 
-        // 太陽赤緯（度）
         let declination = 23.45 * sin(Double(dayOfYear - 81) * 360 / 365 * .pi / 180)
-        // 時角（度）: 地平線での太陽角度から計算
         let hourAngle = acos(-tan(latitude * .pi / 180) * tan(declination * .pi / 180)) * 180 / .pi
 
-        // UTC基準の日の出時刻 = 正午UTC - 経度補正 - 時角
         let sunriseUTC = 12.0 - longitude / 15.0 - hourAngle / 15.0
-        // デバイスのタイムゾーンオフセットを加算してローカル時刻へ変換
         let timezoneOffset = Double(TimeZone.current.secondsFromGMT()) / 3600.0
         let sunriseLocal = sunriseUTC + timezoneOffset
 
@@ -154,7 +208,6 @@ extension SleepMonitorService: CLLocationManagerDelegate {
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        // 位置情報が取得できない場合はデフォルト（6:00）を使用
         Task { @MainActor in
             let calendar = Calendar.current
             self.sunriseDate = calendar.date(bySettingHour: 6, minute: 0, second: 0, of: Date())

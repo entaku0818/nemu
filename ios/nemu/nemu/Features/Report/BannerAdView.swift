@@ -11,7 +11,8 @@ struct BannerAdView: UIViewRepresentable {
     private let adUnitID = "ca-app-pub-3940256099942544/2934735716"
 
     func makeUIView(context: Context) -> GADBannerView {
-        let width = UIScreen.main.bounds.width
+        let width = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }.first?.screen.bounds.width ?? 375
         let adSize = GADCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(width)
         let banner = GADBannerView(adSize: adSize)
         banner.adUnitID = adUnitID

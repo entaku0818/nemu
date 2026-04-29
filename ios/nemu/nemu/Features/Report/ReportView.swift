@@ -37,7 +37,7 @@ struct ReportView: View {
                     .padding(.horizontal)
                     .padding(.top)
 
-                    // 昨夜のスコア
+                    // スコアカード
                     if let session = viewModel.latestSession {
                         ScoreCard(session: session, grade: viewModel.scoreGrade)
                     } else {
@@ -55,16 +55,12 @@ struct ReportView: View {
                     Spacer(minLength: 40)
                 }
             }
-
-            // バナー広告（非プレミアムユーザーのみ、画面下部固定）
-            if !PurchaseService.shared.isPremium {
-                VStack {
-                    Spacer()
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if !PurchaseService.shared.isPremium {
                     BannerAdView()
                         .frame(height: 50)
                         .background(Color.appBackground)
                 }
-                .ignoresSafeArea(edges: .bottom)
             }
         }
         .onAppear {
@@ -106,10 +102,13 @@ struct TotalAssetBadge: View {
 struct ScoreCard: View {
     let session: SleepSession
     let grade: String
+    @State private var showBreakdown = false
+
+    private var breakdown: ScoreBreakdown { session.scoreBreakdown }
 
     var body: some View {
         VStack(spacing: 16) {
-            Text("昨夜のスコア")
+            Text("\(session.dateLabel)のスコア")
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.5))
                 .tracking(2)
@@ -130,10 +129,32 @@ struct ScoreCard: View {
 
             HStack(spacing: 24) {
                 StatItem(label: "睡眠時間", value: session.durationFormatted)
-                StatItem(label: "動いた回数", value: "\(session.motionEventCount)回")
+                StatItem(label: "体動", value: "\(session.motionEventCount)回")
+                if session.snoreTimestamps.count > 0 {
+                    StatItem(label: "いびき", value: "\(session.snoreTimestamps.count)回")
+                }
                 if let wakeTime = session.wakeTime {
                     StatItem(label: "起床", value: wakeTime.formatted(date: .omitted, time: .shortened))
                 }
+            }
+
+            // スコア内訳（タップで展開）
+            Button {
+                withAnimation(.spring(duration: 0.3)) { showBreakdown.toggle() }
+            } label: {
+                HStack(spacing: 4) {
+                    Text("スコア内訳")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.4))
+                    Image(systemName: showBreakdown ? "chevron.up" : "chevron.down")
+                        .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.3))
+                }
+            }
+
+            if showBreakdown {
+                ScoreBreakdownView(breakdown: breakdown)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
         .padding(24)
@@ -143,6 +164,45 @@ struct ScoreCard: View {
                 .fill(Color.white.opacity(0.07))
         )
         .padding(.horizontal)
+    }
+}
+
+struct ScoreBreakdownView: View {
+    let breakdown: ScoreBreakdown
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Divider().background(Color.white.opacity(0.1))
+            BreakdownRow(label: "睡眠時間スコア", value: "+\(breakdown.durationScore)", color: .white.opacity(0.7))
+            BreakdownRow(label: "体動ペナルティ", value: "-\(breakdown.motionPenalty)", color: .orange.opacity(0.8))
+            if breakdown.distributionBonus > 0 {
+                BreakdownRow(label: "自然な目覚めボーナス", value: "+\(breakdown.distributionBonus)", color: .green.opacity(0.9))
+            }
+            if breakdown.snorePenalty > 0 {
+                BreakdownRow(label: "いびきペナルティ", value: "-\(breakdown.snorePenalty)", color: .red.opacity(0.8))
+            }
+            Divider().background(Color.white.opacity(0.1))
+            BreakdownRow(label: "合計", value: "\(breakdown.total)点", color: .white, bold: true)
+        }
+    }
+}
+
+private struct BreakdownRow: View {
+    let label: String
+    let value: String
+    let color: Color
+    var bold: Bool = false
+
+    var body: some View {
+        HStack {
+            Text(label)
+                .font(bold ? .subheadline.bold() : .caption)
+                .foregroundStyle(bold ? .white : .white.opacity(0.5))
+            Spacer()
+            Text(value)
+                .font(bold ? .subheadline.bold() : .caption.bold())
+                .foregroundStyle(color)
+        }
     }
 }
 

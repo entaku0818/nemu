@@ -6,16 +6,28 @@
 import Foundation
 import SwiftData
 
+struct ScoreBreakdown {
+    let durationScore: Int      // 睡眠時間スコア (0-100)
+    let motionPenalty: Int      // 体動ペナルティ (0-40)
+    let distributionBonus: Int  // 後半集中ボーナス (0 or 10)
+    let snorePenalty: Int       // いびきペナルティ (0-20)
+    let total: Int              // 合計 (0-100)
+}
+
 @Model
 final class SleepSession {
     var bedTime: Date
     var wakeTime: Date?
-    var motionEventCount: Int   // 動いた回数
-    var score: Int              // 睡眠スコア 0-100
+    var motionEventCount: Int    // Legacy: CoreMotion query count
+    var motionTimestamps: [Date] // タイムスタンプ付き体動ログ
+    var snoreTimestamps: [Date]  // いびき検知タイムスタンプ
+    var score: Int
 
     init(bedTime: Date = Date(), motionEventCount: Int = 0) {
         self.bedTime = bedTime
         self.motionEventCount = motionEventCount
+        self.motionTimestamps = []
+        self.snoreTimestamps = []
         self.score = 0
     }
 
@@ -30,25 +42,82 @@ final class SleepSession {
         return "\(hours)時間\(minutes)分"
     }
 
-    func calculateScore() {
-        guard let wakeTime else { return }
-        let seconds = wakeTime.timeIntervalSince(bedTime)
-        // 30分未満は記録としてカウントしない
-        guard seconds >= 1800 else {
-            score = 0
-            return
+    var dateLabel: String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(bedTime) { return "今日" }
+        if calendar.isDateInYesterday(bedTime) { return "昨夜" }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ja_JP")
+        formatter.dateFormat = "M/d"
+        return formatter.string(from: bedTime)
+    }
+
+    var scoreBreakdown: ScoreBreakdown {
+        guard let wakeTime else {
+            return ScoreBreakdown(durationScore: 0, motionPenalty: 0, distributionBonus: 0, snorePenalty: 0, total: 0)
         }
+        return SleepSession.computeBreakdown(
+            bedTime: bedTime,
+            wakeTime: wakeTime,
+            motionEventCount: motionEventCount,
+            motionTimestamps: motionTimestamps,
+            snoreTimestamps: snoreTimestamps
+        )
+    }
+
+    func calculateScore() {
+        score = scoreBreakdown.total
+    }
+
+    // テストからも呼べるよう static に切り出す
+    static func computeBreakdown(
+        bedTime: Date,
+        wakeTime: Date,
+        motionEventCount: Int,
+        motionTimestamps: [Date],
+        snoreTimestamps: [Date]
+    ) -> ScoreBreakdown {
+        let seconds = wakeTime.timeIntervalSince(bedTime)
+        guard seconds >= 1800 else {
+            return ScoreBreakdown(durationScore: 0, motionPenalty: 0, distributionBonus: 0, snorePenalty: 0, total: 0)
+        }
+
+        // 睡眠時間スコア
         let hours = seconds / 3600
-        // 理想: 7時間。5h未満=低、5〜8h=線形増加、8h超=100点
         let durationScore: Int
         if hours < 5 {
-            durationScore = Int(hours / 5 * 40)           // 0〜40点
+            durationScore = Int(hours / 5 * 40)
         } else if hours <= 8 {
-            durationScore = Int(40 + (hours - 5) / 3 * 60) // 40〜100点
+            durationScore = Int(40 + (hours - 5) / 3 * 60)
         } else {
-            durationScore = max(0, Int(100 - (hours - 8) * 10)) // 8h超は減点
+            durationScore = max(0, Int(100 - (hours - 8) * 10))
         }
-        let motionPenalty = min(40, motionEventCount * 2)
-        score = max(0, min(100, durationScore - motionPenalty))
+
+        // 体動ペナルティ
+        let effectiveCount = motionTimestamps.isEmpty ? motionEventCount : motionTimestamps.count
+        let motionPenalty = min(40, effectiveCount * 2)
+
+        // 後半集中ボーナス：後半に体動が多い = 自然な目覚め準備
+        let distributionBonus: Int
+        if !motionTimestamps.isEmpty {
+            let midpoint = bedTime.addingTimeInterval(seconds / 2)
+            let firstHalf = motionTimestamps.filter { $0 < midpoint }.count
+            let secondHalf = motionTimestamps.filter { $0 >= midpoint }.count
+            distributionBonus = secondHalf > firstHalf ? 10 : 0
+        } else {
+            distributionBonus = 0
+        }
+
+        // いびきペナルティ
+        let snorePenalty = min(20, snoreTimestamps.count * 3)
+
+        let total = max(0, min(100, durationScore - motionPenalty + distributionBonus - snorePenalty))
+        return ScoreBreakdown(
+            durationScore: durationScore,
+            motionPenalty: motionPenalty,
+            distributionBonus: distributionBonus,
+            snorePenalty: snorePenalty,
+            total: total
+        )
     }
 }

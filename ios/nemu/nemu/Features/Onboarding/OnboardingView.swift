@@ -16,54 +16,76 @@ struct OnboardingView: View {
         ZStack {
             Color(red: 0.06, green: 0.06, blue: 0.12).ignoresSafeArea()
 
-            VStack {
-                // ページインジケーター
-                HStack(spacing: 6) {
-                    ForEach(0..<3, id: \.self) { i in
-                        Capsule()
-                            .fill(i == viewModel.currentPage ? Color.indigo : Color.white.opacity(0.2))
-                            .frame(width: i == viewModel.currentPage ? 24 : 8, height: 8)
-                            .animation(.spring(duration: 0.3), value: viewModel.currentPage)
-                    }
-                }
+            VStack(spacing: 0) {
+                PageIndicator(
+                    current: viewModel.currentPage.rawValue,
+                    total: OnboardingPage.allCases.count
+                )
                 .padding(.top, 60)
+                .padding(.bottom, 8)
 
-                Spacer()
-
-                // ページコンテンツ
-                switch viewModel.currentPage {
-                case 0: WelcomePage()
-                case 1: PermissionsPage(viewModel: viewModel)
-                case 2: WakeTimePage(wakeTime: $viewModel.wakeTime)
-                default: EmptyView()
+                let vm = Bindable(viewModel)
+                TabView(selection: vm.currentPage) {
+                    WelcomePage()
+                        .tag(OnboardingPage.welcome)
+                    MotionDetectionPage()
+                        .tag(OnboardingPage.motionDetection)
+                    SunrisePage()
+                        .tag(OnboardingPage.sunrise)
+                    PermissionsPage(viewModel: viewModel)
+                        .tag(OnboardingPage.permissions)
+                    WakeTimePage(wakeTime: vm.wakeTime)
+                        .tag(OnboardingPage.wakeTime)
+                    CompletePage()
+                        .tag(OnboardingPage.complete)
                 }
+                .tabViewStyle(.page(indexDisplayMode: .never))
 
-                Spacer()
-
-                // ボタン
-                Button {
-                    if viewModel.isLastPage {
-                        saveAndComplete()
-                    } else {
-                        withAnimation(.spring(duration: 0.4)) {
-                            viewModel.nextPage()
-                        }
-                    }
-                } label: {
-                    Text(viewModel.isLastPage ? "はじめる" : "次へ")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color.indigo.gradient)
-                        )
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 48)
+                bottomButtons
             }
         }
+        .onAppear {
+            viewModel.trackPageView(.welcome)
+        }
+        .onChange(of: viewModel.currentPage) { _, page in
+            viewModel.trackPageView(page)
+        }
+    }
+
+    @ViewBuilder
+    private var bottomButtons: some View {
+        VStack(spacing: 12) {
+            if viewModel.currentPage == .permissions {
+                Button("あとで設定する") {
+                    viewModel.skipPermissions()
+                }
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.4))
+                .transition(.opacity)
+            }
+
+            Button {
+                if viewModel.isLastPage {
+                    viewModel.trackCompleted()
+                    saveAndComplete()
+                } else {
+                    viewModel.nextPage()
+                }
+            } label: {
+                Text(viewModel.isLastPage ? "はじめる" : "次へ")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.indigo.gradient)
+                    )
+            }
+            .padding(.horizontal, 24)
+        }
+        .padding(.bottom, 48)
+        .animation(.spring(duration: 0.3), value: viewModel.currentPage)
     }
 
     private func saveAndComplete() {
@@ -78,40 +100,74 @@ struct OnboardingView: View {
     }
 }
 
+// MARK: - ページインジケーター
+
+private struct PageIndicator: View {
+    let current: Int
+    let total: Int
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<total, id: \.self) { i in
+                Capsule()
+                    .fill(i == current ? Color.indigo : Color.white.opacity(0.2))
+                    .frame(width: i == current ? 24 : 8, height: 8)
+                    .animation(.spring(duration: 0.3), value: current)
+            }
+        }
+    }
+}
+
 // MARK: - Page 1: ウェルカム
 
 struct WelcomePage: View {
+    @State private var appeared = false
+
     var body: some View {
         VStack(spacing: 24) {
             Image(systemName: "moon.stars.fill")
                 .font(.system(size: 80))
                 .foregroundStyle(.indigo.gradient)
+                .symbolEffect(.bounce, value: appeared)
+                .scaleEffect(appeared ? 1 : 0.5)
+                .opacity(appeared ? 1 : 0)
 
             VStack(spacing: 12) {
                 Text("ねむ")
                     .font(.system(size: 48, weight: .bold))
                     .foregroundStyle(.white)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 12)
 
                 Text("確実に起きられる\n気持ちいい目覚めを")
                     .font(.title3)
                     .foregroundStyle(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 8)
+                    .animation(.spring(duration: 0.5).delay(0.05), value: appeared)
             }
 
             VStack(spacing: 16) {
-                FeatureRow(icon: "bed.double.fill",    text: "入眠をやさしくサポート")
-                FeatureRow(icon: "alarm.fill",         text: "サイレントでも確実に起こす")
-                FeatureRow(icon: "sun.horizon.fill",   text: "日の出に合わせた自然な目覚め")
+                FeatureRow(icon: "bed.double.fill",  text: "入眠をやさしくサポート",       delay: 0.1, appeared: appeared)
+                FeatureRow(icon: "alarm.fill",        text: "サイレントでも確実に起こす",   delay: 0.2, appeared: appeared)
+                FeatureRow(icon: "sun.horizon.fill",  text: "日の出に合わせた自然な目覚め", delay: 0.3, appeared: appeared)
             }
             .padding(.top, 8)
         }
         .padding(.horizontal, 32)
+        .onAppear {
+            withAnimation(.spring(duration: 0.6)) { appeared = true }
+        }
+        .onDisappear { appeared = false }
     }
 }
 
-struct FeatureRow: View {
+private struct FeatureRow: View {
     let icon: String
     let text: String
+    let delay: Double
+    let appeared: Bool
 
     var body: some View {
         HStack(spacing: 14) {
@@ -125,10 +181,138 @@ struct FeatureRow: View {
             Spacer()
         }
         .padding(.horizontal, 8)
+        .opacity(appeared ? 1 : 0)
+        .offset(x: appeared ? 0 : -20)
+        .animation(.spring(duration: 0.5).delay(delay), value: appeared)
     }
 }
 
-// MARK: - Page 2: 権限
+// MARK: - Page 2: 体動検知
+
+struct MotionDetectionPage: View {
+    @State private var appeared = false
+    @State private var waving = false
+
+    var body: some View {
+        VStack(spacing: 32) {
+            ZStack {
+                ForEach(0..<3, id: \.self) { i in
+                    Circle()
+                        .stroke(Color.indigo.opacity(0.3), lineWidth: 1.5)
+                        .scaleEffect(waving ? 2.8 : 1)
+                        .opacity(waving ? 0 : 0.6)
+                        .animation(
+                            .easeOut(duration: 1.8)
+                                .delay(Double(i) * 0.6)
+                                .repeatForever(autoreverses: false),
+                            value: waving
+                        )
+                        .frame(width: 80, height: 80)
+                }
+
+                Image(systemName: "figure.sleep")
+                    .font(.system(size: 52))
+                    .foregroundStyle(.indigo.gradient)
+                    .scaleEffect(appeared ? 1 : 0.5)
+                    .opacity(appeared ? 1 : 0)
+            }
+            .frame(height: 130)
+
+            VStack(spacing: 12) {
+                Text("体動を検知して\n眠りを計測")
+                    .font(.title2.bold())
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 12)
+
+                Text("スマートフォンを枕元に置くだけで、\n眠りの深さをリアルタイムに検知。\n体動パターンから睡眠スコアを算出します。")
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.6))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 8)
+                    .animation(.spring(duration: 0.5).delay(0.1), value: appeared)
+            }
+        }
+        .padding(.horizontal, 32)
+        .onAppear {
+            withAnimation(.spring(duration: 0.6)) { appeared = true }
+            waving = true
+        }
+        .onDisappear {
+            appeared = false
+            waving = false
+        }
+    }
+}
+
+// MARK: - Page 3: 日の出
+
+struct SunrisePage: View {
+    @State private var appeared = false
+    @State private var glowing = false
+
+    var body: some View {
+        VStack(spacing: 32) {
+            ZStack {
+                ForEach(0..<8, id: \.self) { i in
+                    Capsule()
+                        .fill(Color.orange.opacity(glowing ? 0.35 : 0.05))
+                        .frame(width: 4, height: 28)
+                        .offset(y: -65)
+                        .rotationEffect(.degrees(Double(i) * 45))
+                        .animation(
+                            .easeInOut(duration: 1.4)
+                                .delay(Double(i) * 0.12)
+                                .repeatForever(autoreverses: true),
+                            value: glowing
+                        )
+                }
+
+                Image(systemName: "sun.horizon.fill")
+                    .font(.system(size: 64))
+                    .foregroundStyle(
+                        LinearGradient(colors: [.yellow, .orange], startPoint: .top, endPoint: .bottom)
+                    )
+                    .scaleEffect(appeared ? 1 : 0.4)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 16)
+            }
+            .frame(height: 150)
+
+            VStack(spacing: 12) {
+                Text("日の出に合わせた\n自然な目覚め")
+                    .font(.title2.bold())
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 12)
+
+                Text("現在地の日の出時刻を自動計算。\n設定した起床時刻と組み合わせて、\n最も心地よいタイミングで起こします。")
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.6))
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 8)
+                    .animation(.spring(duration: 0.5).delay(0.1), value: appeared)
+            }
+        }
+        .padding(.horizontal, 32)
+        .onAppear {
+            withAnimation(.spring(duration: 0.7)) { appeared = true }
+            glowing = true
+        }
+        .onDisappear {
+            appeared = false
+            glowing = false
+        }
+    }
+}
+
+// MARK: - Page 4: 権限
 
 struct PermissionsPage: View {
     var viewModel: OnboardingViewModel
@@ -176,7 +360,7 @@ struct PermissionsPage: View {
     }
 }
 
-struct PermissionRow: View {
+private struct PermissionRow: View {
     let icon: String
     let title: String
     let description: String
@@ -222,7 +406,7 @@ struct PermissionRow: View {
     }
 }
 
-// MARK: - Page 3: 起床時刻
+// MARK: - Page 5: 起床時刻
 
 struct WakeTimePage: View {
     @Binding var wakeTime: Date
@@ -249,6 +433,83 @@ struct WakeTimePage: View {
                 .colorScheme(.dark)
         }
         .padding(.horizontal, 24)
+    }
+}
+
+// MARK: - Page 6: 完了
+
+struct CompletePage: View {
+    @State private var appeared = false
+    @State private var sparkle = false
+
+    var body: some View {
+        VStack(spacing: 32) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 80))
+                .foregroundStyle(.indigo.gradient)
+                .symbolEffect(.pulse, isActive: sparkle)
+                .scaleEffect(appeared ? 1 : 0.3)
+                .opacity(appeared ? 1 : 0)
+
+            VStack(spacing: 12) {
+                Text("準備完了！")
+                    .font(.system(size: 36, weight: .bold))
+                    .foregroundStyle(.white)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 12)
+
+                Text("今夜から睡眠資産を\n積み上げよう")
+                    .font(.title3)
+                    .foregroundStyle(.white.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                    .opacity(appeared ? 1 : 0)
+                    .offset(y: appeared ? 0 : 8)
+                    .animation(.spring(duration: 0.5).delay(0.05), value: appeared)
+            }
+
+            VStack(spacing: 10) {
+                UsageTip(icon: "moon.fill",    text: "就寝前に「就寝する」をタップ",       delay: 0.15, appeared: appeared)
+                UsageTip(icon: "iphone",       text: "スマホを枕元に置いて寝るだけ",       delay: 0.25, appeared: appeared)
+                UsageTip(icon: "sun.max.fill", text: "アラームが最適なタイミングで起こします", delay: 0.35, appeared: appeared)
+            }
+        }
+        .padding(.horizontal, 32)
+        .onAppear {
+            withAnimation(.spring(duration: 0.6)) { appeared = true }
+            sparkle = true
+        }
+        .onDisappear {
+            appeared = false
+            sparkle = false
+        }
+    }
+}
+
+private struct UsageTip: View {
+    let icon: String
+    let text: String
+    let delay: Double
+    let appeared: Bool
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: icon)
+                .font(.subheadline)
+                .foregroundStyle(.indigo)
+                .frame(width: 28)
+            Text(text)
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.8))
+            Spacer()
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.07))
+        )
+        .opacity(appeared ? 1 : 0)
+        .offset(y: appeared ? 0 : 12)
+        .animation(.spring(duration: 0.5).delay(delay), value: appeared)
     }
 }
 
