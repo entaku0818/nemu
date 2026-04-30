@@ -353,6 +353,15 @@ struct PermissionsPage: View {
                 ) {
                     viewModel.requestLocation()
                 }
+
+                PermissionRow(
+                    icon: "mic.fill",
+                    title: "マイク",
+                    description: "就寝中のいびきを検知するために使います",
+                    status: viewModel.microphoneGranted
+                ) {
+                    Task { await viewModel.requestMicrophone() }
+                }
             }
             .padding(.horizontal, 8)
         }

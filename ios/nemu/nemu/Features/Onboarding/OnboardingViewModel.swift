@@ -7,6 +7,7 @@ import Foundation
 import Observation
 import UserNotifications
 import CoreLocation
+import AVFoundation
 import FirebaseAnalytics
 
 enum OnboardingPage: Int, CaseIterable {
@@ -37,6 +38,7 @@ final class OnboardingViewModel: NSObject {
     var wakeTime: Date = Calendar.current.date(bySettingHour: 7, minute: 0, second: 0, of: Date()) ?? Date()
     var notificationStatus: UNAuthorizationStatus = .notDetermined
     var locationStatus: CLAuthorizationStatus = .notDetermined
+    var microphoneGranted: Bool = false
 
     private let locationManager = CLLocationManager()
 
@@ -78,6 +80,16 @@ final class OnboardingViewModel: NSObject {
     // MARK: - 位置情報権限
     func requestLocation() {
         locationManager.requestWhenInUseAuthorization()
+    }
+
+    // MARK: - マイク権限
+    func requestMicrophone() async {
+        let granted = await AVAudioApplication.requestRecordPermission()
+        microphoneGranted = granted
+        Analytics.logEvent("onboarding_permission_result", parameters: [
+            "type": "microphone",
+            "granted": granted ? "true" : "false"
+        ])
     }
 }
 
