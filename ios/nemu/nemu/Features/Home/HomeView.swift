@@ -33,7 +33,7 @@ struct HomeView: View {
                                 showScreenshotPreview = true
                             }
                             #endif
-                        Text("ねむ")
+                        Text("Slumber")
                             .font(.headline.bold())
                             .foregroundStyle(.white)
                     }

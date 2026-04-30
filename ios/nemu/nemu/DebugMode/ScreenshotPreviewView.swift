@@ -121,8 +121,8 @@ enum NemuLanguage: String, CaseIterable, Identifiable {
 
     var appTitle: String {
         switch self {
-        case .japanese: return "ねむ"
-        case .english: return "Nemu"
+        case .japanese: return "Slumber"
+        case .english: return "Slumber"
         }
     }
 

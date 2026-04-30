@@ -133,7 +133,7 @@ struct WelcomePage: View {
                 .opacity(appeared ? 1 : 0)
 
             VStack(spacing: 12) {
-                Text("ねむ")
+                Text("Slumber")
                     .font(.system(size: 48, weight: .bold))
                     .foregroundStyle(.white)
                     .opacity(appeared ? 1 : 0)
@@ -328,7 +328,7 @@ struct PermissionsPage: View {
                     .font(.title2.bold())
                     .foregroundStyle(.white)
 
-                Text("ねむが正しく動くために\n以下の権限が必要です")
+                Text("Slumber が正しく動くために\n以下の権限が必要です")
                     .font(.subheadline)
                     .foregroundStyle(.white.opacity(0.6))
                     .multilineTextAlignment(.center)
