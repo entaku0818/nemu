@@ -72,7 +72,6 @@ final class AlarmService {
 
         let alertPresentation = AlarmPresentation.Alert(
             title: "おはようございます",
-            stopButton: AlarmButton(text: "起きた！", textColor: .white, systemImageName: "sun.max.fill"),
             secondaryButton: AlarmButton(text: "あと5分…", textColor: .white, systemImageName: "zzz"),
             secondaryButtonBehavior: .custom
         )
@@ -105,7 +104,7 @@ final class AlarmService {
     func cancelAlarm() async {
         guard let id = scheduledAlarmID else { return }
         do {
-            try await AlarmManager.shared.cancel(id: id)
+            try AlarmManager.shared.cancel(id: id)
             scheduledAlarmID = nil
         } catch {
             errorMessage = error.localizedDescription
