@@ -28,6 +28,12 @@ struct MainTabView: View {
                         Label("レポート", systemImage: "chart.bar.fill")
                     }
                     .tag(1)
+
+                SettingsView()
+                    .tabItem {
+                        Label("設定", systemImage: "gearshape.fill")
+                    }
+                    .tag(2)
             }
             .tint(.indigo)
             .preferredColorScheme(.dark)
