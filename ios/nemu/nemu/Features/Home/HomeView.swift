@@ -11,7 +11,7 @@ struct HomeView: View {
     @State private var viewModel = HomeViewModel()
     @State private var showTimePicker = false
     #if DEBUG
-    @State private var showScreenshotPreview = false
+    @State private var showDebugMenu = false
     #endif
 
     private let dayLabels = ["日", "月", "火", "水", "木", "金", "土"]
@@ -30,7 +30,7 @@ struct HomeView: View {
                             .foregroundStyle(.indigo)
                             #if DEBUG
                             .onLongPressGesture {
-                                showScreenshotPreview = true
+                                showDebugMenu = true
                             }
                             #endif
                         Text("Slumber")
@@ -183,8 +183,8 @@ struct HomeView: View {
             .presentationDragIndicator(.visible)
         }
         #if DEBUG
-        .sheet(isPresented: $showScreenshotPreview) {
-            ScreenshotPreviewView()
+        .sheet(isPresented: $showDebugMenu) {
+            DebugMenuView()
         }
         #endif
         .fullScreenCover(isPresented: $viewModel.isBedtimeMode) {

@@ -24,6 +24,7 @@ final class SleepMonitorService: NSObject {
     var currentBrightness: CGFloat = 0
     var sunriseDate: Date?
     var isMonitoring: Bool = false
+    var currentRMS: Float = 0
 
     // 2条件トリガー（日の出前後30分 AND 体動3回以上）
     var shouldWake: Bool {
@@ -68,6 +69,14 @@ final class SleepMonitorService: NSObject {
         startMotionMonitoring()
         startBrightnessMonitoring()
         startSnoreMonitoring()
+
+        #if DEBUG
+        if DebugSettings.shared.timeAcceleration {
+            sunriseDate = Date().addingTimeInterval(60)
+            return
+        }
+        #endif
+
         if sunriseDate == nil {
             requestLocationForSunrise()
         }
@@ -128,10 +137,11 @@ final class SleepMonitorService: NSObject {
         inputNode.installTap(onBus: 0, bufferSize: 4096, format: format) { [weak self] buffer, _ in
             guard let self else { return }
             let rms = Self.calculateRMS(buffer)
-            // 閾値 0.04 = 室内の中程度の音（いびき目安）
-            // 30秒以内の連続検知は同一イベントとしてまとめる
-            guard rms > 0.04 else { return }
             Task { @MainActor in
+                self.currentRMS = rms
+                // 閾値 0.04 = 室内の中程度の音（いびき目安）
+                // 30秒以内の連続検知は同一イベントとしてまとめる
+                guard rms > 0.04 else { return }
                 let now = Date()
                 if let last = self.lastSnoreTime, now.timeIntervalSince(last) < 30 { return }
                 self.lastSnoreTime = now
@@ -153,6 +163,7 @@ final class SleepMonitorService: NSObject {
         snoreEngine?.stop()
         snoreEngine = nil
         lastSnoreTime = nil
+        currentRMS = 0
     }
 
     private static func calculateRMS(_ buffer: AVAudioPCMBuffer) -> Float {
