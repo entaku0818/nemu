@@ -170,6 +170,22 @@ final class BedtimeViewModel {
         let wakeTime = Date()
         session.wakeTime = wakeTime
 
+        #if DEBUG
+        if DebugSettings.shared.timeAcceleration {
+            let actualDuration = wakeTime.timeIntervalSince(bedTime)
+            let fakeBedTime = wakeTime.addingTimeInterval(-actualDuration * 60)
+            // bedTime を60倍スケール後の値に差し替え
+            session.bedTime = fakeBedTime
+            // motion / snore のタイムスタンプも同比率でスケール
+            session.motionTimestamps = session.motionTimestamps.map { ts in
+                fakeBedTime.addingTimeInterval(ts.timeIntervalSince(bedTime) * 60)
+            }
+            session.snoreTimestamps = session.snoreTimestamps.map { ts in
+                fakeBedTime.addingTimeInterval(ts.timeIntervalSince(bedTime) * 60)
+            }
+        }
+        #endif
+
         // CoreMotion 過去データを照会してモーションイベントをカウント
         // （バックグラウンド中も蓄積されたデータを確実に取得）
         if CMMotionActivityManager.isActivityAvailable() {
