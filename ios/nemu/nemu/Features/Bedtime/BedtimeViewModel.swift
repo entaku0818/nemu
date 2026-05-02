@@ -149,7 +149,7 @@ final class BedtimeViewModel {
         self.modelContext = modelContext
         let now = Date()
         sessionBedTime = now
-        let session = SleepSession(bedTime: now)
+        let session = SleepSession(bedTime: now, scheduledWakeTime: wakeTime)
         modelContext.insert(session)
         do {
             try modelContext.save()

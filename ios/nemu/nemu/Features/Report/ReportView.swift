@@ -136,6 +136,9 @@ struct ScoreCard: View {
                 if let wakeTime = session.wakeTime {
                     StatItem(label: "起床", value: wakeTime.formatted(date: .omitted, time: .shortened))
                 }
+                if let scheduled = session.scheduledWakeTime {
+                    StatItem(label: "予定", value: scheduled.formatted(date: .omitted, time: .shortened))
+                }
             }
 
             // スコア内訳（タップで展開）

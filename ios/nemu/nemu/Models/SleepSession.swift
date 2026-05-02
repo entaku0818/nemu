@@ -18,13 +18,15 @@ struct ScoreBreakdown {
 final class SleepSession {
     var bedTime: Date
     var wakeTime: Date?
+    var scheduledWakeTime: Date?  // 設定したアラーム時刻
     var motionEventCount: Int    // Legacy: CoreMotion query count
     var motionTimestamps: [Date] // タイムスタンプ付き体動ログ
     var snoreTimestamps: [Date]  // いびき検知タイムスタンプ
     var score: Int
 
-    init(bedTime: Date = Date(), motionEventCount: Int = 0) {
+    init(bedTime: Date = Date(), scheduledWakeTime: Date? = nil, motionEventCount: Int = 0) {
         self.bedTime = bedTime
+        self.scheduledWakeTime = scheduledWakeTime
         self.motionEventCount = motionEventCount
         self.motionTimestamps = []
         self.snoreTimestamps = []
