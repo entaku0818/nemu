@@ -231,6 +231,17 @@ struct BedtimeView: View {
             viewModel.finish()
             dismiss()
         }
+        .onChange(of: SleepMonitorService.shared.shouldWake) { _, shouldWake in
+            // 3条件（日の出×体動×輝度）が揃ったら即アラームを鳴らす
+            guard shouldWake else { return }
+            Task {
+                await AlarmService.shared.scheduleAlarm(
+                    at: Date(),
+                    repeatDays: [],
+                    existingID: AlarmService.shared.scheduledAlarmID
+                )
+            }
+        }
         .onAppear {
             bedStartTime = Date()
             viewModel.startSession(modelContext: modelContext, wakeTime: alarmTime)
