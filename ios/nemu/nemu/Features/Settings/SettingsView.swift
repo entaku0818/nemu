@@ -15,6 +15,20 @@ struct SettingsView: View {
     @State private var showPaywall = false
     @State private var purchaseService = PurchaseService.shared
 
+    // 就寝リマインダー
+    @AppStorage("bedtimeReminderEnabled") private var reminderEnabled = false
+    @AppStorage("bedtimeReminderHour") private var reminderHour = 22
+    @AppStorage("bedtimeReminderMinute") private var reminderMinute = 30
+    @State private var showReminderTimePicker = false
+
+    private var reminderTime: Date {
+        Calendar.current.date(bySettingHour: reminderHour, minute: reminderMinute, second: 0, of: Date()) ?? Date()
+    }
+
+    private var reminderTimeText: String {
+        String(format: "%02d:%02d", reminderHour, reminderMinute)
+    }
+
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "-"
     }
@@ -62,6 +76,28 @@ struct SettingsView: View {
                                     Image(systemName: "chevron.right")
                                         .font(.caption)
                                         .foregroundStyle(.white.opacity(0.3))
+                                }
+                            }
+                        }
+                    }
+
+                    // 就寝リマインダー
+                    SettingsSection(title: "就寝リマインダー") {
+                        SettingsRow(icon: "bell.fill", iconColor: .indigo, title: "リマインダー") {
+                            Toggle("", isOn: $reminderEnabled)
+                                .tint(.indigo)
+                                .onChange(of: reminderEnabled) { scheduleReminder() }
+                        }
+
+                        if reminderEnabled {
+                            Divider().background(Color.white.opacity(0.08)).padding(.leading, 56)
+                            Button {
+                                showReminderTimePicker = true
+                            } label: {
+                                SettingsRow(icon: "clock.fill", iconColor: .indigo.opacity(0.6), title: "通知時刻") {
+                                    Text(reminderTimeText)
+                                        .font(.subheadline)
+                                        .foregroundStyle(.white.opacity(0.5))
                                 }
                             }
                         }
@@ -124,8 +160,43 @@ struct SettingsView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             checkPermissions()
         }
+        .sheet(isPresented: $showReminderTimePicker) {
+            VStack(spacing: 0) {
+                HStack {
+                    Spacer()
+                    Button("完了") {
+                        showReminderTimePicker = false
+                        scheduleReminder()
+                    }
+                    .foregroundStyle(.indigo)
+                    .font(.headline)
+                    .padding()
+                }
+                DatePicker("", selection: Binding(
+                    get: { reminderTime },
+                    set: { date in
+                        let c = Calendar.current
+                        reminderHour = c.component(.hour, from: date)
+                        reminderMinute = c.component(.minute, from: date)
+                    }
+                ), displayedComponents: .hourAndMinute)
+                .datePickerStyle(.wheel)
+                .labelsHidden()
+                .colorScheme(.dark)
+                Spacer()
+            }
+            .background(Color.appBackground)
+            .presentationDetents([.height(280)])
+            .presentationDragIndicator(.visible)
+        }
         .sheet(isPresented: $showPaywall) {
             PaywallView()
+        }
+    }
+
+    private func scheduleReminder() {
+        Task {
+            await BedtimeReminderService.shared.schedule(at: reminderTime, enabled: reminderEnabled)
         }
     }
 
