@@ -10,6 +10,7 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = HomeViewModel()
     @State private var showTimePicker = false
+    @State private var showAlarmList = false
     #if DEBUG
     @State private var showDebugMenu = false
     #endif
@@ -102,21 +103,28 @@ struct HomeView: View {
                 )
                 .padding(.horizontal)
 
-                // アラームON/OFF
-                VStack(spacing: 8) {
-                    Toggle(isOn: $viewModel.isAlarmEnabled) {
-                        Text("アラーム")
-                            .foregroundStyle(.white)
+                // アラーム一覧へのリンク
+                Button {
+                    showAlarmList = true
+                } label: {
+                    HStack {
+                        Image(systemName: "alarm.fill")
+                            .foregroundStyle(.indigo)
+                        Text(viewModel.nextAlarmDescription)
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.7))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.3))
                     }
-                    .tint(.indigo)
-                    .padding(.horizontal, 24)
-                    .onChange(of: viewModel.isAlarmEnabled) {
-                        viewModel.saveAlarmSetting()
-                    }
-
-                    Text(viewModel.nextAlarmDescription)
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.4))
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.white.opacity(0.07))
+                    )
+                    .padding(.horizontal)
                 }
                 .padding(.top, 20)
 
@@ -187,6 +195,9 @@ struct HomeView: View {
             DebugMenuView()
         }
         #endif
+        .sheet(isPresented: $showAlarmList) {
+            AlarmListView()
+        }
         .fullScreenCover(isPresented: $viewModel.isBedtimeMode) {
             BedtimeView(alarmTime: viewModel.wakeTime)
         }
