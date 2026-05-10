@@ -26,13 +26,24 @@ final class SleepMonitorService: NSObject {
     var isMonitoring: Bool = false
     var currentRMS: Float = 0
 
-    // 2条件トリガー（日の出前後30分 AND 体動3回以上）
+    // 輝度履歴（直近30件 = 30分分）
+    private(set) var brightnessHistory: [(date: Date, value: CGFloat)] = []
+    private var baselineBrightness: CGFloat = 0
+
+    // 輝度が就寝時より 0.15 以上上昇していれば「明るくなった」と判断
+    var isBrightnessRising: Bool {
+        guard brightnessHistory.count >= 3 else { return false }
+        let recent = brightnessHistory.suffix(3).map(\.value).reduce(0, +) / 3
+        return recent - baselineBrightness >= 0.15
+    }
+
+    // 3条件トリガー（日の出前後30分 AND 体動3回以上 AND 輝度上昇）
     var shouldWake: Bool {
         guard isMonitoring, let sunrise = sunriseDate else { return false }
         let now = Date()
         let nearSunrise = abs(now.timeIntervalSince(sunrise)) < 30 * 60
         let effectiveCount = motionTimestamps.isEmpty ? motionEventCount : motionTimestamps.count
-        return nearSunrise && effectiveCount > 3
+        return nearSunrise && effectiveCount > 3 && isBrightnessRising
     }
 
     private let motionManager = CMMotionActivityManager()
@@ -63,8 +74,14 @@ final class SleepMonitorService: NSObject {
         self.motionEventCount = 0
         self.motionTimestamps = []
         self.snoreTimestamps = []
+        self.brightnessHistory = []
         self.lastSnoreTime = nil
         self.isMonitoring = true
+
+        let initialBrightness = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }.first?.screen.brightness ?? 0
+        self.baselineBrightness = initialBrightness
+        self.currentBrightness = initialBrightness
 
         startMotionMonitoring()
         startBrightnessMonitoring()
@@ -113,8 +130,15 @@ final class SleepMonitorService: NSObject {
     private func startBrightnessMonitoring() {
         brightnessTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
-                self?.currentBrightness = UIApplication.shared.connectedScenes
+                guard let self else { return }
+                let brightness = UIApplication.shared.connectedScenes
                     .compactMap { $0 as? UIWindowScene }.first?.screen.brightness ?? 0
+                self.currentBrightness = brightness
+                self.brightnessHistory.append((date: Date(), value: brightness))
+                // 直近30件（30分分）だけ保持
+                if self.brightnessHistory.count > 30 {
+                    self.brightnessHistory.removeFirst()
+                }
             }
         }
     }
