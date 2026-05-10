@@ -241,7 +241,9 @@ final class BedtimeViewModel {
         isFinished = true
         restoreScreen()
         endSession()
-        // 通知は endSession() 内の非同期処理後に投稿される
+        Task {
+            await AlarmService.shared.cancelAlarm()
+        }
     }
 
     /// 記録を保存せずにセッションを破棄する（緊急終了用）

@@ -111,6 +111,77 @@ final class AlarmService {
         }
     }
 
+    func cancelAlarm(id: UUID) async {
+        do {
+            try AlarmManager.shared.cancel(id: id)
+            if scheduledAlarmID == id { scheduledAlarmID = nil }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    // MARK: - 個別スケジュール（複数アラーム対応）
+
+    func scheduleAlarm(at date: Date, repeatDays: Set<Int>, existingID: UUID?) async -> UUID? {
+        if !isAuthorized { await requestAuthorization() }
+        guard isAuthorized else { return nil }
+
+        if let old = existingID {
+            try? AlarmManager.shared.cancel(id: old)
+        }
+
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: date)
+        let minute = calendar.component(.minute, from: date)
+
+        let schedule: Alarm.Schedule
+        if repeatDays.isEmpty {
+            schedule = .fixed(date)
+        } else {
+            let weekdays: [Locale.Weekday] = repeatDays.compactMap {
+                switch $0 {
+                case 0: return .sunday
+                case 1: return .monday
+                case 2: return .tuesday
+                case 3: return .wednesday
+                case 4: return .thursday
+                case 5: return .friday
+                case 6: return .saturday
+                default: return nil
+                }
+            }
+            let time = Alarm.Schedule.Relative.Time(hour: hour, minute: minute)
+            schedule = .relative(.init(time: time, repeats: .weekly(weekdays)))
+        }
+
+        let alertPresentation = AlarmPresentation.Alert(
+            title: "おはようございます",
+            secondaryButton: AlarmButton(text: "あと5分…", textColor: .white, systemImageName: "zzz"),
+            secondaryButtonBehavior: .custom
+        )
+        let presentation = AlarmPresentation(alert: alertPresentation)
+        let attributes = AlarmAttributes<NemuAlarmMetadata>(
+            presentation: presentation,
+            metadata: NemuAlarmMetadata(),
+            tintColor: Color.indigo
+        )
+        let configuration = AlarmManager.AlarmConfiguration<NemuAlarmMetadata>.alarm(
+            schedule: schedule,
+            attributes: attributes,
+            stopIntent: WakeUpIntent(),
+            secondaryIntent: SnoozeIntent()
+        )
+
+        do {
+            let id = UUID()
+            let _ = try await AlarmManager.shared.schedule(id: id, configuration: configuration)
+            return id
+        } catch {
+            errorMessage = error.localizedDescription
+            return nil
+        }
+    }
+
     // MARK: - 次のアラーム日時を計算
 
     func nextAlarmDate(wakeTime: Date, repeatDays: Set<Int>) -> Date? {
