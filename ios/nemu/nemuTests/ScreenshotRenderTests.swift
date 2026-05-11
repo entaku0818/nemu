@@ -53,12 +53,18 @@ final class ScreenshotRenderTests: XCTestCase {
 
     @ViewBuilder
     private func makeView(screen: NemuScreenshotScreen, language: NemuLanguage) -> some View {
-        switch screen {
-        case .home:      MockNemuHomeView(language: language)
-        case .bedtime:   MockBedtimeView(language: language)
-        case .wakeScore: MockWakeScoreView(language: language)
-        case .report:    MockNemuReportView(language: language)
-        case .paywall:   MockNemuPaywallView(language: language)
+        AppStoreScreenshotView(
+            title: screen.title(language: language),
+            subtitle: screen.subtitle(language: language),
+            background: screen.background
+        ) {
+            switch screen {
+            case .home:      MockNemuHomeView(language: language)
+            case .bedtime:   MockBedtimeView(language: language)
+            case .wakeScore: MockWakeScoreView(language: language)
+            case .report:    MockNemuReportView(language: language)
+            case .paywall:   MockNemuPaywallView(language: language)
+            }
         }
     }
 

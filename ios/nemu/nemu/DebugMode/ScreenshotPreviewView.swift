@@ -294,9 +294,16 @@ struct MockNemuHomeView: View {
                         Text("アラーム")
                             .foregroundStyle(.white)
                         Spacer()
-                        Toggle("", isOn: .constant(true))
-                            .tint(.indigo)
-                            .labelsHidden()
+                        // ImageRenderer非対応のToggleをカスタム実装
+                        Capsule()
+                            .fill(Color.indigo)
+                            .frame(width: 51, height: 31)
+                            .overlay(
+                                Circle()
+                                    .fill(.white)
+                                    .frame(width: 27, height: 27)
+                                    .offset(x: 10)
+                            )
                     }
                     .padding(.horizontal, 24)
                     Text("明日 7:00")
@@ -671,7 +678,186 @@ struct MockNemuPaywallView: View {
     }
 }
 
+// MARK: - iPhone フレーム
+
+struct PhoneMockupView<Content: View>: View {
+    let content: Content
+
+    // iPhone 16 Pro Max 比率に合わせた内部サイズ
+    private let cornerRadius: CGFloat = 50
+    private let borderWidth: CGFloat = 8
+    private let dynamicIslandW: CGFloat = 120
+    private let dynamicIslandH: CGFloat = 34
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let h = geo.size.height
+
+            ZStack {
+                // ベゼル
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(Color(white: 0.12))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius)
+                            .strokeBorder(
+                                LinearGradient(
+                                    colors: [Color(white: 0.4), Color(white: 0.2)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: borderWidth
+                            )
+                    )
+
+                // 画面
+                RoundedRectangle(cornerRadius: cornerRadius - borderWidth)
+                    .fill(Color.black)
+                    .padding(borderWidth)
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius - borderWidth))
+
+                // コンテンツ
+                content
+                    .frame(width: w - borderWidth * 2, height: h - borderWidth * 2)
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius - borderWidth))
+                    .offset(x: 0, y: 0)
+                    .padding(borderWidth)
+
+                // Dynamic Island
+                Capsule()
+                    .fill(Color.black)
+                    .frame(width: dynamicIslandW, height: dynamicIslandH)
+                    .frame(width: w, height: h, alignment: .top)
+                    .padding(.top, borderWidth + 12)
+
+                // ホームインジケーター
+                Capsule()
+                    .fill(Color(white: 0.5).opacity(0.6))
+                    .frame(width: 120, height: 5)
+                    .frame(width: w, height: h, alignment: .bottom)
+                    .padding(.bottom, borderWidth + 8)
+            }
+            .frame(width: w, height: h)
+        }
+    }
+}
+
+// MARK: - App Store スクリーンショット（フレーム＋背景＋キャプション）
+
+struct AppStoreScreenshotView<Content: View>: View {
+    let title: String
+    let subtitle: String
+    let background: [Color]
+    let content: Content
+
+    init(
+        title: String,
+        subtitle: String,
+        background: [Color],
+        @ViewBuilder content: () -> Content
+    ) {
+        self.title = title
+        self.subtitle = subtitle
+        self.background = background
+        self.content = content()
+    }
+
+    var body: some View {
+        ZStack {
+            // 背景グラデーション
+            LinearGradient(colors: background, startPoint: .topLeading, endPoint: .bottomTrailing)
+                .ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                // キャプション
+                VStack(spacing: 8) {
+                    Text(title)
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                    Text(subtitle)
+                        .font(.system(size: 16, weight: .regular))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.top, 52)
+                .padding(.horizontal, 28)
+                .padding(.bottom, 28)
+
+                // iPhone フレーム
+                PhoneMockupView {
+                    content
+                }
+                .aspectRatio(9/19.5, contentMode: .fit)
+                .padding(.horizontal, 24)
+
+                Spacer(minLength: 24)
+            }
+        }
+    }
+}
+
+// MARK: - キャプション定義
+
+extension NemuScreenshotScreen {
+    func title(language: NemuLanguage) -> String {
+        switch (self, language) {
+        case (.home, .japanese):      return "確実に起きられる\nアラーム"
+        case (.home, .english):       return "Wake Up\nReliably"
+        case (.bedtime, .japanese):   return "就寝中も\nしっかりサポート"
+        case (.bedtime, .english):    return "Monitored\nWhile You Sleep"
+        case (.wakeScore, .japanese): return "眠りを\nスコアで可視化"
+        case (.wakeScore, .english):  return "Visualize\nYour Sleep"
+        case (.report, .japanese):    return "睡眠資産を\n積み上げる"
+        case (.report, .english):     return "Build Your\nSleep Asset"
+        case (.paywall, .japanese):   return "もっと深く\n眠るために"
+        case (.paywall, .english):    return "Sleep Deeper\nWith Premium"
+        }
+    }
+
+    func subtitle(language: NemuLanguage) -> String {
+        switch (self, language) {
+        case (.home, .japanese):      return "日の出・体動・明るさ3条件で\n最適なタイミングに起こします"
+        case (.home, .english):       return "Sunrise × Motion × Light\ntrigger the perfect wake-up"
+        case (.bedtime, .japanese):   return "サイレントモードでも\n絶対に鳴るAlarmKit搭載"
+        case (.bedtime, .english):    return "Powered by AlarmKit —\nrings even in Silent mode"
+        case (.wakeScore, .japanese): return "睡眠時間・体動・いびきを分析\n毎朝スコアをお知らせ"
+        case (.wakeScore, .english):  return "Duration, motion & snoring\nanalyzed every morning"
+        case (.report, .japanese):    return "毎日の記録が積み重なる\n週間トレンドで傾向を把握"
+        case (.report, .english):     return "Track weekly trends and\nbuild your sleep history"
+        case (.paywall, .japanese):   return "詳細レポート・全自然音・\n長期グラフでさらに快眠へ"
+        case (.paywall, .english):    return "Detailed reports, all sounds\nand long-term graphs"
+        }
+    }
+
+    var background: [Color] {
+        switch self {
+        case .home:      return [Color(red: 0.08, green: 0.08, blue: 0.25), Color(red: 0.15, green: 0.10, blue: 0.35)]
+        case .bedtime:   return [Color(red: 0.05, green: 0.05, blue: 0.15), Color(red: 0.10, green: 0.08, blue: 0.22)]
+        case .wakeScore: return [Color(red: 0.10, green: 0.15, blue: 0.30), Color(red: 0.20, green: 0.12, blue: 0.28)]
+        case .report:    return [Color(red: 0.08, green: 0.12, blue: 0.28), Color(red: 0.18, green: 0.10, blue: 0.32)]
+        case .paywall:   return [Color(red: 0.20, green: 0.14, blue: 0.10), Color(red: 0.30, green: 0.18, blue: 0.08)]
+        }
+    }
+}
+
 #Preview {
     ScreenshotPreviewView()
+}
+
+// フレーム付きプレビュー
+#Preview("Home JA Framed") {
+    AppStoreScreenshotView(
+        title: NemuScreenshotScreen.home.title(language: .japanese),
+        subtitle: NemuScreenshotScreen.home.subtitle(language: .japanese),
+        background: NemuScreenshotScreen.home.background
+    ) {
+        MockNemuHomeView(language: .japanese)
+    }
+    .frame(width: 393, height: 852)
 }
 #endif
