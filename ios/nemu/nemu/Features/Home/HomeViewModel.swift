@@ -48,10 +48,14 @@ final class HomeViewModel {
 
         latestSession = sessions.first(where: { $0.score > 0 })
 
-        let totalSeconds = sessions.compactMap { session -> TimeInterval? in
-            guard let wakeTime = session.wakeTime else { return nil }
-            return wakeTime.timeIntervalSince(session.bedTime)
-        }.reduce(0, +)
+        let totalSeconds = sessions
+            .filter { $0.score > 0 }
+            .compactMap { session -> TimeInterval? in
+                guard let wakeTime = session.wakeTime else { return nil }
+                let duration = wakeTime.timeIntervalSince(session.bedTime)
+                // 異常値（24時間超）は除外
+                return duration > 0 && duration <= 86400 ? duration : nil
+            }.reduce(0, +)
         totalSleepHours = Int(totalSeconds / 3600)
 
         streakDays = calculateStreak(sessions: sessions)
