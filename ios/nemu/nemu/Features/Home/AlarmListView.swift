@@ -11,6 +11,7 @@ struct AlarmListView: View {
     @Environment(\.dismiss) private var dismiss
     @Query(sort: [SortDescriptor(\AlarmSetting.wakeTime)]) private var alarms: [AlarmSetting]
     @State private var showAddSheet = false
+    @State private var isEditing = false
 
     private let dayLabels = ["日", "月", "火", "水", "木", "金", "土"]
 
@@ -37,12 +38,20 @@ struct AlarmListView: View {
 
                     Spacer()
 
-                    Button {
-                        showAddSheet = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .font(.title3)
+                    HStack(spacing: 16) {
+                        if !alarms.isEmpty {
+                            Button(isEditing ? "完了" : "編集") {
+                                isEditing.toggle()
+                            }
                             .foregroundStyle(.indigo)
+                        }
+                        Button {
+                            showAddSheet = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.title3)
+                                .foregroundStyle(.indigo)
+                        }
                     }
                 }
                 .padding()
@@ -69,7 +78,27 @@ struct AlarmListView: View {
                     ScrollView {
                         VStack(spacing: 12) {
                             ForEach(alarms) { alarm in
-                                AlarmRow(alarm: alarm, dayLabels: dayLabels)
+                                HStack(spacing: 12) {
+                                    if isEditing {
+                                        Button {
+                                            Task {
+                                                if let idStr = alarm.scheduledAlarmIDString,
+                                                   let id = UUID(uuidString: idStr) {
+                                                    await AlarmService.shared.cancelAlarm(id: id)
+                                                }
+                                                modelContext.delete(alarm)
+                                                try? modelContext.save()
+                                            }
+                                        } label: {
+                                            Image(systemName: "minus.circle.fill")
+                                                .foregroundStyle(.red)
+                                                .font(.title3)
+                                        }
+                                        .transition(.move(edge: .leading).combined(with: .opacity))
+                                    }
+                                    AlarmRow(alarm: alarm, dayLabels: dayLabels)
+                                }
+                                .animation(.easeInOut, value: isEditing)
                             }
                             .padding(.horizontal)
                         }

@@ -9,13 +9,10 @@ import SwiftData
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = HomeViewModel()
-    @State private var showTimePicker = false
     @State private var showAlarmList = false
     #if DEBUG
     @State private var showDebugMenu = false
     #endif
-
-    private let dayLabels = ["日", "月", "火", "水", "木", "金", "土"]
 
     var body: some View {
         ZStack {
@@ -23,7 +20,7 @@ struct HomeView: View {
 
             VStack(spacing: 0) {
 
-                // ヘッダー: ブランド + 累計資産バッジ
+                // ヘッダー
                 HStack {
                     HStack(spacing: 6) {
                         Image(systemName: "moon.stars.fill")
@@ -47,7 +44,7 @@ struct HomeView: View {
                 .padding(.top, 16)
                 .padding(.bottom, 20)
 
-                // 昨夜のスコアカード（記録がある場合のみ）
+                // 昨夜のスコアカード
                 if let session = viewModel.latestSession, session.score > 0 {
                     CompactScoreCard(
                         session: session,
@@ -58,52 +55,7 @@ struct HomeView: View {
                     .padding(.bottom, 24)
                 }
 
-                // 起床時刻 + 曜日
-                VStack(spacing: 16) {
-                    Text("起床時刻")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.4))
-                        .textCase(.uppercase)
-                        .tracking(2)
-
-                    // 大活字タイポグラフィ（タップで編集シートを開く）
-                    Button {
-                        showTimePicker = true
-                    } label: {
-                        Text(viewModel.wakeTimeFormatted)
-                            .font(.system(size: 56, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .contentTransition(.numericText())
-                    }
-
-                    // 繰り返し曜日
-                    HStack(spacing: 8) {
-                        ForEach(0..<7, id: \.self) { day in
-                            Button {
-                                viewModel.toggleRepeatDay(day)
-                            } label: {
-                                Text(dayLabels[day])
-                                    .font(.caption.bold())
-                                    .frame(width: 36, height: 36)
-                                    .background(
-                                        Circle()
-                                            .fill(viewModel.repeatDays.contains(day)
-                                                  ? Color.indigo
-                                                  : Color.white.opacity(0.1))
-                                    )
-                                    .foregroundStyle(.white)
-                            }
-                        }
-                    }
-                }
-                .padding(24)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.white.opacity(0.07))
-                )
-                .padding(.horizontal)
-
-                // アラーム一覧へのリンク
+                // 次のアラーム（タップで一覧へ）
                 Button {
                     showAlarmList = true
                 } label: {
@@ -126,11 +78,11 @@ struct HomeView: View {
                     )
                     .padding(.horizontal)
                 }
-                .padding(.top, 20)
+                .padding(.top, 16)
 
                 Spacer()
 
-                // 就寝ボタン + マイクロコピー
+                // 就寝ボタン
                 VStack(spacing: 8) {
                     Button {
                         viewModel.startBedtime()
@@ -146,7 +98,6 @@ struct HomeView: View {
                             )
                     }
 
-                    // 連続記録 or 資産マイクロコピー
                     if viewModel.streakDays >= 2 {
                         Text("\(viewModel.streakDays)日連続記録中 ✦")
                             .font(.caption2)
@@ -163,43 +114,20 @@ struct HomeView: View {
         }
         .onAppear {
             viewModel.setup(modelContext: modelContext)
-            // 就寝前に位置情報を先行取得。フォアグラウンド中に完了させることで
-            // WhenInUse権限のまま日の出計算を確実に行う。
             SleepMonitorService.shared.prepareForSleep()
         }
-        // 起床時刻編集シート
-        .sheet(isPresented: $showTimePicker) {
-            VStack(spacing: 0) {
-                HStack {
-                    Spacer()
-                    Button("完了") { showTimePicker = false }
-                        .foregroundStyle(.indigo)
-                        .font(.headline)
-                        .padding()
-                }
-                DatePicker("", selection: $viewModel.wakeTime, displayedComponents: .hourAndMinute)
-                    .datePickerStyle(.wheel)
-                    .labelsHidden()
-                    .colorScheme(.dark)
-                    .onChange(of: viewModel.wakeTime) {
-                        viewModel.saveAlarmSetting()
-                    }
-                Spacer()
-            }
-            .background(Color.appBackground)
-            .presentationDetents([.height(280)])
-            .presentationDragIndicator(.visible)
+        .sheet(isPresented: $showAlarmList, onDismiss: {
+            viewModel.reload()
+        }) {
+            AlarmListView()
         }
         #if DEBUG
         .sheet(isPresented: $showDebugMenu) {
             DebugMenuView()
         }
         #endif
-        .sheet(isPresented: $showAlarmList) {
-            AlarmListView()
-        }
         .fullScreenCover(isPresented: $viewModel.isBedtimeMode) {
-            BedtimeView(alarmTime: viewModel.wakeTime)
+            BedtimeView(alarmTime: viewModel.nextAlarmSetting?.wakeTime ?? Date())
         }
         .alert("保存エラー", isPresented: Binding(
             get: { viewModel.dbError != nil },
@@ -212,7 +140,7 @@ struct HomeView: View {
     }
 }
 
-// MARK: - 昨夜スコアカード（コンパクト版）
+// MARK: - 昨夜スコアカード
 
 private struct CompactScoreCard: View {
     let session: SleepSession
@@ -230,7 +158,6 @@ private struct CompactScoreCard: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // スコア数字
             HStack(alignment: .bottom, spacing: 3) {
                 Text("\(session.score)")
                     .font(.system(size: 36, weight: .bold, design: .rounded))
@@ -241,7 +168,6 @@ private struct CompactScoreCard: View {
                     .padding(.bottom, 4)
             }
 
-            // グレード + 睡眠時間
             VStack(alignment: .leading, spacing: 3) {
                 Text(grade)
                     .font(.caption.bold())
@@ -253,7 +179,6 @@ private struct CompactScoreCard: View {
 
             Spacer()
 
-            // 連続記録バッジ（2日以上で表示）
             if streak >= 2 {
                 VStack(spacing: 2) {
                     Text("🔥")
