@@ -10,9 +10,6 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = HomeViewModel()
     @State private var showAlarmList = false
-    #if DEBUG
-    @State private var showDebugMenu = false
-    #endif
 
     var body: some View {
         ZStack {
@@ -26,11 +23,6 @@ struct HomeView: View {
                         Image(systemName: "moon.stars.fill")
                             .font(.title3)
                             .foregroundStyle(.indigo)
-                            #if DEBUG
-                            .onLongPressGesture {
-                                showDebugMenu = true
-                            }
-                            #endif
                         Text("Slumber")
                             .font(.headline.bold())
                             .foregroundStyle(.white)
@@ -121,11 +113,6 @@ struct HomeView: View {
         }) {
             AlarmListView()
         }
-        #if DEBUG
-        .sheet(isPresented: $showDebugMenu) {
-            DebugMenuView()
-        }
-        #endif
         .fullScreenCover(isPresented: $viewModel.isBedtimeMode) {
             BedtimeView(alarmTime: viewModel.nextAlarmSetting?.wakeTime ?? Date())
         }

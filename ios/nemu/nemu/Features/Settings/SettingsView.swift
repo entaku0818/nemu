@@ -14,6 +14,9 @@ struct SettingsView: View {
     @State private var microphoneGranted = false
     @State private var showPaywall = false
     @State private var purchaseService = PurchaseService.shared
+    #if DEBUG
+    @State private var showDebugMenu = false
+    #endif
 
     // 就寝リマインダー
     @AppStorage("bedtimeReminderEnabled") private var reminderEnabled = false
@@ -149,6 +152,20 @@ struct SettingsView: View {
                                 EmptyView()
                             }
                         }
+                        Divider().background(Color.white.opacity(0.08)).padding(.leading, 56)
+                        Button {
+                            showDebugMenu = true
+                        } label: {
+                            SettingsRow(
+                                icon: "ladybug.fill",
+                                iconColor: .orange,
+                                title: "デバッグメニュー"
+                            ) {
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.white.opacity(0.3))
+                            }
+                        }
                         #endif
                     }
 
@@ -189,6 +206,11 @@ struct SettingsView: View {
             .presentationDetents([.height(280)])
             .presentationDragIndicator(.visible)
         }
+        #if DEBUG
+        .sheet(isPresented: $showDebugMenu) {
+            DebugMenuView()
+        }
+        #endif
         .sheet(isPresented: $showPaywall) {
             PaywallView()
         }
