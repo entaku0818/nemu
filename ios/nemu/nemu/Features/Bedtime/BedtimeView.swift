@@ -16,7 +16,6 @@ struct BedtimeView: View {
     @State private var showWakeConfirm = false
     @State private var showQuitConfirm = false
     @State private var showPaywall = false
-    @State private var showBreathing = false
     @State private var bedStartTime = Date()
     @State private var elapsedTime: TimeInterval = 0
     #if DEBUG
@@ -129,17 +128,6 @@ struct BedtimeView: View {
 
                 VStack(spacing: 16) {
                     Button {
-                        showBreathing = true
-                    } label: {
-                        Label("呼吸法ガイド", systemImage: "wind")
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.6))
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 12)
-                            .background(Capsule().fill(Color.white.opacity(0.08)))
-                    }
-
-                    Button {
                         showWakeConfirm = true
                     } label: {
                         Label("起きた！", systemImage: "sun.max.fill")
@@ -179,24 +167,6 @@ struct BedtimeView: View {
         }
         .sheet(isPresented: $showPaywall) {
             PaywallView()
-        }
-        .sheet(isPresented: $showBreathing) {
-            ZStack {
-                Color.black.ignoresSafeArea()
-                VStack {
-                    HStack {
-                        Spacer()
-                        Button("閉じる") { showBreathing = false }
-                            .foregroundStyle(.white.opacity(0.5))
-                            .padding()
-                    }
-                    Spacer()
-                    BreathingGuideView()
-                    Spacer()
-                }
-            }
-            .presentationDetents([.medium])
-            .presentationDragIndicator(.visible)
         }
         .interactiveDismissDisabled(true)
         .alert("保存エラー", isPresented: Binding(
