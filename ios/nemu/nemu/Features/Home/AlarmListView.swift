@@ -5,6 +5,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct AlarmListView: View {
     @Environment(\.modelContext) private var modelContext
@@ -77,6 +78,7 @@ struct AlarmListView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 12) {
+
                             ForEach(alarms) { alarm in
                                 HStack(spacing: 12) {
                                     if isEditing && alarms.count > 1 {
@@ -110,6 +112,10 @@ struct AlarmListView: View {
         }
         .sheet(isPresented: $showAddSheet) {
             AddAlarmSheet()
+        }
+        .onChange(of: alarms) {
+            let next = alarms.first(where: { $0.isEnabled })
+            WidgetDataWriter.update(nextAlarm: next?.wakeTime, enabled: next != nil)
         }
     }
 }
@@ -290,8 +296,17 @@ private struct AddAlarmSheet: View {
             )
             setting.scheduledAlarmIDString = id?.uuidString
             try? modelContext.save()
+            refreshWidget()
         }
         dismiss()
+    }
+
+    private func refreshWidget() {
+        let allAlarms = (try? modelContext.fetch(FetchDescriptor<AlarmSetting>(
+            sortBy: [SortDescriptor(\AlarmSetting.wakeTime)]
+        ))) ?? []
+        let next = allAlarms.first(where: { $0.isEnabled })
+        WidgetDataWriter.update(nextAlarm: next?.wakeTime, enabled: next != nil)
     }
 }
 

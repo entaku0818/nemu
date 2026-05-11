@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		61595DD02FB21D67001D1F6B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61595DCF2FB21D67001D1F6B /* WidgetKit.framework */; };
+		61595DD22FB21D67001D1F6B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61595DD12FB21D67001D1F6B /* SwiftUI.framework */; };
+		61595DE12FB21D69001D1F6B /* NemuWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 61595DCD2FB21D67001D1F6B /* NemuWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		61E5A9EE2F7756890002D8D5 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 65DA4E70E5F848C5A695D2E9 /* GoogleMobileAds */; };
 		61E5AAEC2F7778B20002D8D5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E5AAEB2F7778B20002D8D5 /* GoogleService-Info.plist */; };
 		FBA004FF2F7800000000D8D5 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = FBA002FF2F7800000000D8D5 /* FirebaseAnalytics */; };
@@ -14,6 +17,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		61595DDF2FB21D69001D1F6B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 61C83B102F5D7A2B00D24258 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 61595DCC2FB21D67001D1F6B;
+			remoteInfo = NemuWidgetExtension;
+		};
 		61C83B262F5D7A2D00D24258 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 61C83B102F5D7A2B00D24258 /* Project object */;
@@ -30,14 +40,49 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		61595DE62FB21D69001D1F6B /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				61595DE12FB21D69001D1F6B /* NemuWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		61595DCD2FB21D67001D1F6B /* NemuWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NemuWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		61595DCF2FB21D67001D1F6B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		61595DD12FB21D67001D1F6B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		61C83B182F5D7A2B00D24258 /* nemu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = nemu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61C83B252F5D7A2D00D24258 /* nemuTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = nemuTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		61C83B2F2F5D7A2D00D24258 /* nemuUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = nemuUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		61E5AAEB2F7778B20002D8D5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		61595DE22FB21D69001D1F6B /* Exceptions for "NemuWidget" folder in "NemuWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 61595DCC2FB21D67001D1F6B /* NemuWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		61595DD32FB21D67001D1F6B /* NemuWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				61595DE22FB21D69001D1F6B /* Exceptions for "NemuWidget" folder in "NemuWidgetExtension" target */,
+			);
+			path = NemuWidget;
+			sourceTree = "<group>";
+		};
 		61C83B1A2F5D7A2B00D24258 /* nemu */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = nemu;
@@ -56,6 +101,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		61595DCA2FB21D67001D1F6B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				61595DD22FB21D67001D1F6B /* SwiftUI.framework in Frameworks */,
+				61595DD02FB21D67001D1F6B /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		61C83B152F5D7A2B00D24258 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -83,12 +137,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		61595DCE2FB21D67001D1F6B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				61595DCF2FB21D67001D1F6B /* WidgetKit.framework */,
+				61595DD12FB21D67001D1F6B /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		61C83B0F2F5D7A2B00D24258 = {
 			isa = PBXGroup;
 			children = (
 				61C83B1A2F5D7A2B00D24258 /* nemu */,
 				61C83B282F5D7A2D00D24258 /* nemuTests */,
 				61C83B322F5D7A2D00D24258 /* nemuUITests */,
+				61595DD32FB21D67001D1F6B /* NemuWidget */,
+				61595DCE2FB21D67001D1F6B /* Frameworks */,
 				61C83B192F5D7A2B00D24258 /* Products */,
 				61E5AAEB2F7778B20002D8D5 /* GoogleService-Info.plist */,
 			);
@@ -100,6 +165,7 @@
 				61C83B182F5D7A2B00D24258 /* nemu.app */,
 				61C83B252F5D7A2D00D24258 /* nemuTests.xctest */,
 				61C83B2F2F5D7A2D00D24258 /* nemuUITests.xctest */,
+				61595DCD2FB21D67001D1F6B /* NemuWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -107,6 +173,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		61595DCC2FB21D67001D1F6B /* NemuWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 61595DE32FB21D69001D1F6B /* Build configuration list for PBXNativeTarget "NemuWidgetExtension" */;
+			buildPhases = (
+				61595DC92FB21D67001D1F6B /* Sources */,
+				61595DCA2FB21D67001D1F6B /* Frameworks */,
+				61595DCB2FB21D67001D1F6B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				61595DD32FB21D67001D1F6B /* NemuWidget */,
+			);
+			name = NemuWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = NemuWidgetExtension;
+			productReference = 61595DCD2FB21D67001D1F6B /* NemuWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		61C83B172F5D7A2B00D24258 /* nemu */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 61C83B392F5D7A2D00D24258 /* Build configuration list for PBXNativeTarget "nemu" */;
@@ -114,10 +202,12 @@
 				61C83B142F5D7A2B00D24258 /* Sources */,
 				61C83B152F5D7A2B00D24258 /* Frameworks */,
 				61C83B162F5D7A2B00D24258 /* Resources */,
+				61595DE62FB21D69001D1F6B /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				61595DE02FB21D69001D1F6B /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				61C83B1A2F5D7A2B00D24258 /* nemu */,
@@ -188,6 +278,9 @@
 				LastSwiftUpdateCheck = 2630;
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
+					61595DCC2FB21D67001D1F6B = {
+						CreatedOnToolsVersion = 26.3;
+					};
 					61C83B172F5D7A2B00D24258 = {
 						CreatedOnToolsVersion = 26.3;
 					};
@@ -222,11 +315,19 @@
 				61C83B172F5D7A2B00D24258 /* nemu */,
 				61C83B242F5D7A2D00D24258 /* nemuTests */,
 				61C83B2E2F5D7A2D00D24258 /* nemuUITests */,
+				61595DCC2FB21D67001D1F6B /* NemuWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		61595DCB2FB21D67001D1F6B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		61C83B162F5D7A2B00D24258 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -252,6 +353,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		61595DC92FB21D67001D1F6B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		61C83B142F5D7A2B00D24258 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -276,6 +384,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		61595DE02FB21D69001D1F6B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 61595DCC2FB21D67001D1F6B /* NemuWidgetExtension */;
+			targetProxy = 61595DDF2FB21D69001D1F6B /* PBXContainerItemProxy */;
+		};
 		61C83B272F5D7A2D00D24258 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 61C83B172F5D7A2B00D24258 /* nemu */;
@@ -289,6 +402,66 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		61595DE42FB21D69001D1F6B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4YZQY4C47E;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NemuWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NemuWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.entaku.slumber.NemuWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		61595DE52FB21D69001D1F6B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4YZQY4C47E;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NemuWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NemuWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.entaku.slumber.NemuWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		61C83B372F5D7A2D00D24258 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -553,6 +726,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		61595DE32FB21D69001D1F6B /* Build configuration list for PBXNativeTarget "NemuWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				61595DE42FB21D69001D1F6B /* Debug */,
+				61595DE52FB21D69001D1F6B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		61C83B132F5D7A2B00D24258 /* Build configuration list for PBXProject "nemu" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
