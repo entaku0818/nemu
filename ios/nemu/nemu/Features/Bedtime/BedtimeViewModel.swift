@@ -201,10 +201,16 @@ final class BedtimeViewModel {
                 session.calculateScore()
                 self.lastScore = session.score
                 self.lastDuration = session.duration
-                do {
-                    try context.save()
-                } catch {
-                    self.dbError = "睡眠データの保存に失敗しました: \(error.localizedDescription)"
+                // 30分未満（スコア0確定）は記録しない
+                if session.duration < 1800 {
+                    context.delete(session)
+                    try? context.save()
+                } else {
+                    do {
+                        try context.save()
+                    } catch {
+                        self.dbError = "睡眠データの保存に失敗しました: \(error.localizedDescription)"
+                    }
                 }
                 SleepMonitorService.shared.stopMonitoring()
                 NotificationCenter.default.post(
@@ -221,7 +227,13 @@ final class BedtimeViewModel {
             session.calculateScore()
             lastScore = session.score
             lastDuration = session.duration
-            try? context.save()
+            // 30分未満（スコア0確定）は記録しない
+            if session.duration < 1800 {
+                context.delete(session)
+                try? context.save()
+            } else {
+                try? context.save()
+            }
             SleepMonitorService.shared.stopMonitoring()
             NotificationCenter.default.post(
                 name: .didWakeUp,
@@ -242,8 +254,22 @@ final class BedtimeViewModel {
         restoreScreen()
         endSession()
         Task {
-            await AlarmService.shared.cancelAlarm()
+            await cancelAllAlarms()
         }
+    }
+
+    private func cancelAllAlarms() async {
+        guard let context = modelContext else {
+            await AlarmService.shared.cancelAlarm()
+            return
+        }
+        let alarms = (try? context.fetch(FetchDescriptor<AlarmSetting>())) ?? []
+        for alarm in alarms {
+            if let idStr = alarm.scheduledAlarmIDString, let id = UUID(uuidString: idStr) {
+                await AlarmService.shared.cancelAlarm(id: id)
+            }
+        }
+        await AlarmService.shared.cancelAlarm()
     }
 
     /// 記録を保存せずにセッションを破棄する（緊急終了用）

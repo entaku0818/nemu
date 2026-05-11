@@ -22,10 +22,8 @@ final class ReportViewModel {
 
     private func loadSessions() {
         guard let context = modelContext else { return }
-        let descriptor = FetchDescriptor<SleepSession>(
-            sortBy: [SortDescriptor(\.bedTime, order: .reverse)]
-        )
-        allSessions = (try? context.fetch(descriptor)) ?? []
+        let repo = SleepSessionRepository(context: context)
+        allSessions = repo.fetchValid()
         latestSession = allSessions.first
     }
 
@@ -53,25 +51,15 @@ final class ReportViewModel {
 
     // MARK: - 累計睡眠時間（資産総量）
 
-    /// 全セッションの合計睡眠時間（時間単位・切り捨て）
     var totalSleepHours: Int {
-        let totalSeconds = allSessions.compactMap { session -> TimeInterval? in
-            guard let wake = session.wakeTime else { return nil }
-            return wake.timeIntervalSince(session.bedTime)
-        }.reduce(0, +)
-        return Int(totalSeconds / 3600)
+        guard let context = modelContext else { return 0 }
+        return SleepSessionRepository(context: context).totalSleepHours()
     }
 
     // MARK: - 週間グラフ用データ
 
     var weeklyScores: [(date: Date, score: Int)] {
-        let calendar = Calendar.current
-        return (0..<7).compactMap { dayOffset -> (Date, Int)? in
-            guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) else { return nil }
-            let dayStart = calendar.startOfDay(for: date)
-            let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) ?? dayStart
-            let session = allSessions.first { $0.bedTime >= dayStart && $0.bedTime < dayEnd }
-            return (dayStart, session?.score ?? 0)
-        }.reversed()
+        guard let context = modelContext else { return [] }
+        return SleepSessionRepository(context: context).weeklyScores()
     }
 }

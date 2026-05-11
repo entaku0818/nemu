@@ -219,7 +219,8 @@ struct BedtimeView: View {
             let pendingKey = "alarmKitWakeTimestamp"
             if UserDefaults.standard.double(forKey: pendingKey) > 0 {
                 UserDefaults.standard.removeObject(forKey: pendingKey)
-                viewModel.finish()
+                // セッション開始直後の復元 → 記録せず破棄
+                viewModel.cancelSession()
                 dismiss()
             }
         }

@@ -57,9 +57,7 @@ final class HomeViewModel {
             sortBy: [SortDescriptor(\.wakeTime)]
         )
         let alarms = (try? context.fetch(descriptor)) ?? []
-        // 有効なアラームのうち最も近い時刻
         nextAlarmSetting = alarms.first(where: { $0.isEnabled }) ?? alarms.first
-        // AlarmKit ID を復元
         if let idString = nextAlarmSetting?.scheduledAlarmIDString,
            let uuid = UUID(uuidString: idString) {
             AlarmService.shared.scheduledAlarmID = uuid
@@ -68,42 +66,10 @@ final class HomeViewModel {
 
     private func loadSleepStats() {
         guard let context = modelContext else { return }
-        let descriptor = FetchDescriptor<SleepSession>(
-            sortBy: [SortDescriptor(\.bedTime, order: .reverse)]
-        )
-        guard let sessions = try? context.fetch(descriptor) else { return }
-
-        latestSession = sessions.first(where: { $0.score > 0 })
-
-        let totalSeconds = sessions
-            .filter { $0.score > 0 }
-            .compactMap { session -> TimeInterval? in
-                guard let wakeTime = session.wakeTime else { return nil }
-                let duration = wakeTime.timeIntervalSince(session.bedTime)
-                return duration > 0 && duration <= 86400 ? duration : nil
-            }.reduce(0, +)
-        totalSleepHours = Int(totalSeconds / 3600)
-
-        streakDays = calculateStreak(sessions: sessions)
-    }
-
-    private func calculateStreak(sessions: [SleepSession]) -> Int {
-        let validSessions = sessions.filter { $0.score > 0 }
-        guard !validSessions.isEmpty else { return 0 }
-        let calendar = Calendar.current
-        var streak = 1
-        var prevDay = calendar.startOfDay(for: validSessions[0].bedTime)
-        for session in validSessions.dropFirst() {
-            let sessionDay = calendar.startOfDay(for: session.bedTime)
-            let diff = calendar.dateComponents([.day], from: sessionDay, to: prevDay).day ?? 0
-            if diff == 1 {
-                streak += 1
-                prevDay = sessionDay
-            } else {
-                break
-            }
-        }
-        return streak
+        let repo = SleepSessionRepository(context: context)
+        latestSession = repo.latestValidSession()
+        totalSleepHours = repo.totalSleepHours()
+        streakDays = repo.streak()
     }
 
     func startBedtime() {

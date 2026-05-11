@@ -26,7 +26,7 @@ struct PaywallView: View {
     // MARK: - 実データ集計
 
     private var completedSessions: [SleepSession] {
-        sessions.filter { $0.wakeTime != nil }
+        sessions.filter { $0.score > 0 && $0.wakeTime != nil }
     }
 
     private var hasRealData: Bool { !completedSessions.isEmpty }
