@@ -39,7 +39,7 @@ struct AlarmListView: View {
                     Spacer()
 
                     HStack(spacing: 16) {
-                        if !alarms.isEmpty {
+                        if alarms.count > 1 {
                             Button(isEditing ? "完了" : "編集") {
                                 isEditing.toggle()
                             }
@@ -79,7 +79,7 @@ struct AlarmListView: View {
                         VStack(spacing: 12) {
                             ForEach(alarms) { alarm in
                                 HStack(spacing: 12) {
-                                    if isEditing {
+                                    if isEditing && alarms.count > 1 {
                                         Button {
                                             Task {
                                                 if let idStr = alarm.scheduledAlarmIDString,
@@ -96,7 +96,7 @@ struct AlarmListView: View {
                                         }
                                         .transition(.move(edge: .leading).combined(with: .opacity))
                                     }
-                                    AlarmRow(alarm: alarm, dayLabels: dayLabels)
+                                    AlarmRow(alarm: alarm, dayLabels: dayLabels, canDelete: alarms.count > 1)
                                 }
                                 .animation(.easeInOut, value: isEditing)
                             }
@@ -119,6 +119,7 @@ struct AlarmListView: View {
 private struct AlarmRow: View {
     @Bindable var alarm: AlarmSetting
     let dayLabels: [String]
+    var canDelete: Bool = true
 
     var body: some View {
         HStack(spacing: 16) {
@@ -181,17 +182,19 @@ private struct AlarmRow: View {
                 .fill(Color.white.opacity(0.07))
         )
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button(role: .destructive) {
-                Task {
-                    if let idStr = alarm.scheduledAlarmIDString,
-                       let id = UUID(uuidString: idStr) {
-                        await AlarmService.shared.cancelAlarm(id: id)
+            if canDelete {
+                Button(role: .destructive) {
+                    Task {
+                        if let idStr = alarm.scheduledAlarmIDString,
+                           let id = UUID(uuidString: idStr) {
+                            await AlarmService.shared.cancelAlarm(id: id)
+                        }
+                        alarm.modelContext?.delete(alarm)
+                        try? alarm.modelContext?.save()
                     }
-                    alarm.modelContext?.delete(alarm)
-                    try? alarm.modelContext?.save()
+                } label: {
+                    Label("削除", systemImage: "trash")
                 }
-            } label: {
-                Label("削除", systemImage: "trash")
             }
         }
     }
