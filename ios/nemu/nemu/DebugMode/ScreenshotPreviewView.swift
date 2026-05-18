@@ -425,12 +425,11 @@ struct MockNemuReportView: View {
     var body: some View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
-            ScrollView {
-                VStack(spacing: 24) {
-                    reportHeader
-                    scoreCard
-                    weeklyChartCard
-                }
+            VStack(spacing: 24) {
+                reportHeader
+                scoreCard
+                weeklyChartCard
+                Spacer()
             }
         }
     }
@@ -490,26 +489,31 @@ struct MockNemuReportView: View {
         .padding(.horizontal)
     }
 
+    // Chart非対応のためカスタム棒グラフ
     private var weeklyChartCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(language.weeklyTrend)
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.5))
-            Chart {
-                ForEach(Array(zip(dayLabels, mockScores)), id: \.0) { day, score in
-                    BarMark(x: .value("Day", day), y: .value("Score", score))
-                        .foregroundStyle(score >= 80 ? AnyShapeStyle(Color.assetGold) : AnyShapeStyle(Color.indigo))
-                        .cornerRadius(4)
+            GeometryReader { geo in
+                let maxScore = mockScores.max() ?? 100
+                let barWidth = (geo.size.width - CGFloat(mockScores.count - 1) * 8) / CGFloat(mockScores.count)
+                HStack(alignment: .bottom, spacing: 8) {
+                    ForEach(Array(zip(dayLabels, mockScores)), id: \.0) { day, score in
+                        VStack(spacing: 4) {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(score >= 80 ? Color.assetGold : Color.indigo)
+                                .frame(width: barWidth, height: geo.size.height * 0.82 * score / maxScore)
+                            Text(day)
+                                .font(.system(size: 10))
+                                .foregroundStyle(.white.opacity(0.6))
+                                .frame(width: barWidth)
+                        }
+                    }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
             }
             .frame(height: 120)
-            .chartYScale(domain: 0...100)
-            .chartXAxis {
-                AxisMarks(values: .automatic) { _ in
-                    AxisValueLabel().foregroundStyle(Color.white.opacity(0.6))
-                }
-            }
-            .chartYAxis(.hidden)
         }
         .padding(20)
         .background(RoundedRectangle(cornerRadius: 16).fill(Color.white.opacity(0.07)))
