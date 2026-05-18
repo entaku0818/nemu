@@ -1,0 +1,78 @@
+require 'dotenv'
+Dotenv.load('../.env')
+
+default_platform(:ios)
+
+platform :ios do
+  before_all do
+    app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
+      key_content: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"]
+    )
+  end
+
+  desc "Create app in App Store Connect"
+  lane :create_app do
+    produce(
+      app_identifier: "com.entaku.slumber",
+      app_name: "Nemu - Sleep Tracker",
+      language: "ja",
+      app_version: "1.0",
+      sku: "nemu-sleep-tracker-2024",
+      platform: "ios",
+      skip_devcenter: true
+    )
+  end
+
+  desc "Upload to TestFlight"
+  lane :beta do
+    upload_to_testflight(
+      ipa: "build/export/Slumber.ipa",
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Upload metadata to App Store Connect"
+  lane :upload_metadata do
+    deliver(
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      skip_metadata: false,
+      force: true,
+      run_precheck_before_submit: false,
+      precheck_include_in_app_purchases: false,
+      ignore_language_directory_validation: true
+    )
+  end
+
+  desc "Submit for App Store review"
+  lane :submit_build do
+    deliver(
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      skip_metadata: true,
+      force: true,
+      submit_for_review: true,
+      automatic_release: false,
+      run_precheck_before_submit: false,
+      precheck_include_in_app_purchases: false,
+      submission_information: {
+        export_compliance_uses_encryption: false,
+        add_id_info_uses_idfa: false
+      }
+    )
+  end
+
+  desc "Upload screenshots to App Store Connect"
+  lane :upload_screenshots do
+    deliver(
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_screenshots: false,
+      overwrite_screenshots: true,
+      force: true,
+      run_precheck_before_submit: false
+    )
+  end
+end

@@ -1,0 +1,18 @@
+Slumber turns your sleep into a growing asset — track, score, and build your sleep history night after night.
+
+Wake up feeling refreshed with smart alarms, and watch your sleep asset grow over time.
+
+【Key Features】
+• Smart Alarm — wakes you at the optimal moment based on sunrise, body movement, and light levels
+• AlarmKit — system-level alarm that rings even in Silent mode
+• Sleep Score — analyzes duration, motion, and environment to give you a morning score
+• Weekly Report — see your 7-day sleep trend at a glance with bar charts
+• Lock Screen Widget — check your next alarm time anytime
+• Bedtime Mode — simple display showing elapsed sleep time and your alarm
+
+【Perfect for】
+· People who want to wake up refreshed every morning
+· Anyone looking to track and improve their sleep quality
+· Those who want to understand their personal sleep patterns
+
+Sleep is your asset.

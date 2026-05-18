@@ -1,0 +1,2 @@
+Initial release.
+Enjoy smart alarms, sleep scores, and weekly sleep reports.
