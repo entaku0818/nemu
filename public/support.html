@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>サポート - Nemu（ねむ）</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+      background: #0a0a14;
+      color: #f0f0f5;
+      line-height: 1.8;
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 60px 24px; }
+    nav { margin-bottom: 40px; }
+    nav a { color: #7070aa; text-decoration: none; font-size: 0.9rem; }
+    nav a:hover { color: #c0b0ff; }
+    h1 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+    .lead { color: #8888aa; font-size: 1rem; margin-bottom: 40px; }
+    h2 { font-size: 1.2rem; font-weight: 600; margin: 36px 0 16px; color: #c0b0ff; }
+    p { color: #c0c0d5; margin-bottom: 12px; font-size: 0.95rem; }
+    .faq-item {
+      background: #14142a;
+      border: 1px solid #2a2a44;
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .faq-item h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+    .faq-item p { margin-bottom: 0; font-size: 0.9rem; color: #9090b0; }
+    .contact-box {
+      background: linear-gradient(135deg, #1a1a3e 0%, #14142a 100%);
+      border: 1px solid #3a3a60;
+      border-radius: 20px;
+      padding: 32px;
+      text-align: center;
+      margin-top: 48px;
+    }
+    .contact-box h2 { margin: 0 0 12px; }
+    .contact-box p { color: #9090b0; margin-bottom: 24px; }
+    .contact-btn {
+      display: inline-block;
+      padding: 14px 32px;
+      background: #6050c0;
+      color: #fff;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+    .contact-btn:hover { background: #7060d0; }
+    footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid #1a1a2e;
+      text-align: center;
+      color: #555570;
+      font-size: 0.85rem;
+    }
+    footer a { color: #7070aa; text-decoration: none; margin: 0 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav><a href="/">← Nemu トップ</a></nav>
+    <h1>サポート</h1>
+    <p class="lead">Nemu（ねむ）についてのご質問・お問い合わせはこちらをご覧ください。</p>
+
+    <h2>よくあるご質問</h2>
+
+    <div class="faq-item">
+      <h3>アラームが鳴りません</h3>
+      <p>設定アプリ → Nemu → 通知 で通知が許可されているか確認してください。AlarmKit を使用しているため、サイレントモードでも鳴ります。アプリを一度終了して再起動すると解決することがあります。</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>睡眠スコアが記録されません</h3>
+      <p>スコアは就寝モード終了後（アラーム停止後）に算出されます。就寝モードを最低30分以上利用していることが条件です。また、体動検知のためモーションセンサーへのアクセスを許可してください。</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>位置情報を使う理由は？</h3>
+      <p>日の出時刻を取得するために使用しています。日の出と同時に自然な明るさで目覚める「スマートアラーム」機能のためです。位置情報は保存されません。</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>ヘルスケアアプリと連携できますか？</h3>
+      <p>現在開発中です。今後のアップデートで Apple ヘルスケアへの睡眠データ保存機能を追加予定です。</p>
+    </div>
+
+    <div class="faq-item">
+      <h3>データはどこに保存されますか？</h3>
+      <p>すべてのデータはお使いのデバイス内にのみ保存されます。外部サーバーへのアップロードは行われません。</p>
+    </div>
+
+    <div class="contact-box">
+      <h2>お問い合わせ</h2>
+      <p>上記で解決しない場合は、メールでお問い合わせください。<br>通常 2〜3 営業日以内にご返答します。</p>
+      <a class="contact-btn" href="mailto:support@nemu-app.com">メールで問い合わせる</a>
+    </div>
+
+    <footer>
+      <p>© 2024 Nemu App</p>
+      <p style="margin-top: 12px;">
+        <a href="/">トップ</a>
+        <a href="/privacy">プライバシーポリシー</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
