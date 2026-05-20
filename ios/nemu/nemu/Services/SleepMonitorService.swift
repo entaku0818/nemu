@@ -207,7 +207,13 @@ final class SleepMonitorService: NSObject {
 
     private func calculateSunrise(for location: CLLocation) {
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
+        let sessionStart = bedTime ?? Date()
+        let sessionHour = calendar.component(.hour, from: sessionStart)
+        // 18時以降の就寝は翌朝の日の出を計算
+        let baseDay = calendar.startOfDay(for: sessionStart)
+        let today = sessionHour >= 18
+            ? calendar.date(byAdding: .day, value: 1, to: baseDay) ?? baseDay
+            : baseDay
 
         let latitude = location.coordinate.latitude
         let longitude = location.coordinate.longitude
@@ -220,12 +226,12 @@ final class SleepMonitorService: NSObject {
         let timezoneOffset = Double(TimeZone.current.secondsFromGMT()) / 3600.0
         let sunriseLocal = sunriseUTC + timezoneOffset
 
-        let hour = Int(sunriseLocal) % 24
-        let minute = Int((sunriseLocal - Double(Int(sunriseLocal))) * 60)
+        // 負値・24超えを正規化してから 0...23 / 0...59 にクランプ
+        let rawHour = Int(sunriseLocal)
+        let hour = min(max(((rawHour % 24) + 24) % 24, 0), 23)
+        let minute = min(max(Int((sunriseLocal - Double(rawHour)) * 60), 0), 59)
 
-        if let sunrise = calendar.date(bySettingHour: max(0, hour),
-                                        minute: max(0, minute),
-                                        second: 0, of: today) {
+        if let sunrise = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: today) {
             self.sunriseDate = sunrise
         }
     }
@@ -243,9 +249,9 @@ extension SleepMonitorService: CLLocationManagerDelegate {
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        // 位置情報取得失敗時はスマートアラームを無効化（設定アラーム時刻のみで起床）
         Task { @MainActor in
-            let calendar = Calendar.current
-            self.sunriseDate = calendar.date(bySettingHour: 6, minute: 0, second: 0, of: Date())
+            self.sunriseDate = nil
         }
     }
 

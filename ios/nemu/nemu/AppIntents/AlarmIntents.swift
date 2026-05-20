@@ -28,6 +28,7 @@ struct SnoozeIntent: AppIntent, LiveActivityIntent {
     static let title: LocalizedStringResource = "あと5分…"
 
     func perform() async throws -> some IntentResult {
+        await AlarmService.shared.cancelAlarm()
         let snoozeDate = Date().addingTimeInterval(5 * 60)
         await AlarmService.shared.scheduleAlarm(at: snoozeDate, repeatDays: [])
         return .result()
