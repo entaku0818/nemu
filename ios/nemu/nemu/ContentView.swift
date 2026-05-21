@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import StoreKit
 
 struct MainTabView: View {
     @State private var showAssetBanner = false
@@ -13,6 +14,7 @@ struct MainTabView: View {
     @State private var showWakeResult = false
     @State private var wakeScore = 0
     @State private var wakeDuration: TimeInterval = 0
+    @Environment(\.requestReview) private var requestReview
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -64,10 +66,23 @@ struct MainTabView: View {
             // 30分未満のセッションはスコア画面を出さずそのままReportへ
             if wakeDuration >= 1800 {
                 showWakeResult = true
+                requestReviewIfNeeded()
             } else {
                 selectedTab = 1
             }
             showBanner()
+        }
+    }
+
+    private func requestReviewIfNeeded() {
+        let key = "com.entaku.nemu.wakeUpCount"
+        let count = UserDefaults.standard.integer(forKey: key) + 1
+        UserDefaults.standard.set(count, forKey: key)
+        // 3回目・10回目・30回目の起床時にレビューを促す
+        let reviewMilestones: Set<Int> = [3, 10, 30]
+        guard reviewMilestones.contains(count) else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            requestReview()
         }
     }
 
