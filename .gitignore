@@ -2,3 +2,15 @@ firebase-debug.log
 *.xcuserstate
 .DS_Store
 *.bak
+
+# Firebase
+.firebase/
+
+# Secrets
+ios/nemu/.env
+
+# Build artifacts
+ios/nemu/build/
+
+# Playwright MCP
+.playwright-mcp/
