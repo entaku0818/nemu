@@ -18,8 +18,7 @@ struct nemuApp: App {
     init() {
         FirebaseApp.configure()
         GADMobileAds.sharedInstance().start(completionHandler: nil)
-        // TODO: RevenueCat SPM追加後、ダッシュボードで取得した API キーを設定する
-        // PurchaseService.shared.configure(apiKey: "YOUR_REVENUECAT_API_KEY")
+        PurchaseService.shared.configure(apiKey: "YOUR_REVENUECAT_IOS_PUBLIC_KEY")
     }
 
     var body: some Scene {
