@@ -21,6 +21,9 @@ struct PaywallView: View {
     /// 呼び出し元から渡す。空の場合はモックデータを表示。
     var sessions: [SleepSession] = []
 
+    /// Analytics 用の表示元識別子（"home", "bedtime", "report" など）
+    var analyticsSource: String = "unknown"
+
     enum PlanType { case monthly, yearly }
 
     // MARK: - 実データ集計
@@ -177,6 +180,9 @@ struct PaywallView: View {
                     }
                 }
             }
+        }
+        .onAppear {
+            NemuAnalytics.logPaywallView(source: analyticsSource)
         }
     }
 }

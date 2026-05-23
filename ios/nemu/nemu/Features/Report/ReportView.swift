@@ -65,6 +65,7 @@ struct ReportView: View {
         }
         .onAppear {
             viewModel.setup(modelContext: modelContext)
+            NemuAnalytics.logReportView()
         }
         .onReceive(NotificationCenter.default.publisher(for: .didWakeUp)) { _ in
             viewModel.setup(modelContext: modelContext)

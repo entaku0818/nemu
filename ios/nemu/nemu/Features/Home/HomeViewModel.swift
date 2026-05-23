@@ -75,6 +75,8 @@ final class HomeViewModel {
     func startBedtime() {
         isBedtimeMode = true
         scheduleEnabledAlarms()
+        let wakeHour = Calendar.current.component(.hour, from: nextAlarmSetting?.wakeTime ?? Date())
+        NemuAnalytics.logBedtimeStart(scheduledWakeHour: wakeHour)
     }
 
     private func scheduleEnabledAlarms() {

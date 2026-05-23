@@ -94,6 +94,7 @@ final class AlarmService {
             let id = UUID()
             let _ = try await AlarmManager.shared.schedule(id: id, configuration: configuration)
             scheduledAlarmID = id
+            NemuAnalytics.logAlarmSet(hour: hour, minute: minute, hasRepeat: !repeatDays.isEmpty)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -175,6 +176,7 @@ final class AlarmService {
         do {
             let id = UUID()
             let _ = try await AlarmManager.shared.schedule(id: id, configuration: configuration)
+            NemuAnalytics.logAlarmSet(hour: hour, minute: minute, hasRepeat: !repeatDays.isEmpty)
             return id
         } catch {
             errorMessage = error.localizedDescription

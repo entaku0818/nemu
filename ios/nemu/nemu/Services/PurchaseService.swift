@@ -39,18 +39,25 @@ final class PurchaseService {
     }
 
     private func purchase(productId: String) async {
+        let plan = productId.contains("yearly") ? "yearly" : "monthly"
         isLoading = true
         defer { isLoading = false }
+        NemuAnalytics.logPurchaseStarted(plan: plan)
         do {
             let products = try await Purchases.shared.products([productId])
             guard let product = products.first else {
                 errorMessage = "商品が見つかりませんでした"
+                NemuAnalytics.logPurchaseFailed(plan: plan)
                 return
             }
             let (_, info, _) = try await Purchases.shared.purchase(product: product)
             isPremium = info.entitlements["premium"]?.isActive == true
+            if isPremium {
+                NemuAnalytics.logPurchaseCompleted(plan: plan)
+            }
         } catch {
             errorMessage = "購入に失敗しました"
+            NemuAnalytics.logPurchaseFailed(plan: plan)
         }
     }
 
@@ -60,7 +67,9 @@ final class PurchaseService {
         do {
             let info = try await Purchases.shared.restorePurchases()
             isPremium = info.entitlements["premium"]?.isActive == true
-            if !isPremium {
+            if isPremium {
+                NemuAnalytics.logPurchaseRestored()
+            } else {
                 errorMessage = "有効なサブスクリプションが見つかりませんでした"
             }
         } catch {
