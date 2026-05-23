@@ -21,7 +21,7 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-3484697221349891~8101159948</string>
 	<key>NSAlarmKitUsageDescription</key>
 	<string>ねむは、設定した起床時刻にサイレントモードでも確実にアラームを鳴らすために使用します。</string>
 	<key>NSHealthShareUsageDescription</key>

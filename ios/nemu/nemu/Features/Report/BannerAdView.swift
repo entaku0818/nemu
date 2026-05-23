@@ -8,7 +8,7 @@ import GoogleMobileAds
 import UIKit
 
 struct BannerAdView: UIViewRepresentable {
-    private let adUnitID = "ca-app-pub-3940256099942544/2934735716"
+    private let adUnitID = "ca-app-pub-3484697221349891/6788078271"
 
     func makeUIView(context: Context) -> GADBannerView {
         let width = UIApplication.shared.connectedScenes
