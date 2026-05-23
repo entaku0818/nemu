@@ -223,6 +223,111 @@ enum NemuLanguage: String, CaseIterable, Identifiable {
         case .english: return "Good Sleep"
         }
     }
+
+    var alarmLabel: String {
+        switch self {
+        case .japanese: return "アラーム"
+        case .english: return "Alarm"
+        }
+    }
+
+    var tomorrowAlarm: String {
+        switch self {
+        case .japanese: return "明日 7:00"
+        case .english: return "Tomorrow 7:00"
+        }
+    }
+
+    var sleepDurationFormatted: String {
+        switch self {
+        case .japanese: return "7時間23分"
+        case .english: return "7h 23m"
+        }
+    }
+
+    var motionLabel: String {
+        switch self {
+        case .japanese: return "モーション"
+        case .english: return "Motion"
+        }
+    }
+
+    var motionLevel: String {
+        switch self {
+        case .japanese: return "少ない"
+        case .english: return "Low"
+        }
+    }
+
+    var viewReportButton: String {
+        switch self {
+        case .japanese: return "レポートを見る"
+        case .english: return "View Report"
+        }
+    }
+
+    var wakeUpButton: String {
+        switch self {
+        case .japanese: return "起床する"
+        case .english: return "Wake Up"
+        }
+    }
+
+    var alarmAtTime: String {
+        switch self {
+        case .japanese: return "目覚まし 7:00"
+        case .english: return "Alarm 7:00"
+        }
+    }
+
+    var sleepElapsedFormatted: String {
+        switch self {
+        case .japanese: return "3時間12分"
+        case .english: return "3h 12m"
+        }
+    }
+
+    var totalLabel: String {
+        switch self {
+        case .japanese: return "累計"
+        case .english: return "Total"
+        }
+    }
+
+    var totalHours: String {
+        switch self {
+        case .japanese: return "52時間"
+        case .english: return "52h"
+        }
+    }
+
+    var scoreUnit: String {
+        switch self {
+        case .japanese: return "82点"
+        case .english: return "82pts"
+        }
+    }
+
+    var startTrialButton: String {
+        switch self {
+        case .japanese: return "14日間無料トライアルを始める"
+        case .english: return "Start 14-Day Free Trial"
+        }
+    }
+
+    var dayLabels: [String] {
+        switch self {
+        case .japanese: return ["日", "月", "火", "水", "木", "金", "土"]
+        case .english:  return ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+        }
+    }
+
+    var weekDayLabels: [String] {
+        switch self {
+        case .japanese: return ["月", "火", "水", "木", "金", "土", "日"]
+        case .english:  return ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+        }
+    }
 }
 
 // MARK: - Screen Enum
@@ -237,7 +342,6 @@ enum NemuScreenshotScreen: String, CaseIterable {
 // MARK: - Mock: Home
 struct MockNemuHomeView: View {
     let language: NemuLanguage
-    private let dayLabels = ["日", "月", "火", "水", "木", "金", "土"]
     @State private var wakeTime = Calendar.current.date(bySettingHour: 7, minute: 0, second: 0, of: Date()) ?? Date()
 
     var body: some View {
@@ -269,7 +373,7 @@ struct MockNemuHomeView: View {
 
                     HStack(spacing: 8) {
                         ForEach(0..<7, id: \.self) { day in
-                            Text(dayLabels[day])
+                            Text(language.dayLabels[day])
                                 .font(.caption.bold())
                                 .frame(width: 36, height: 36)
                                 .background(
@@ -291,7 +395,7 @@ struct MockNemuHomeView: View {
 
                 VStack(spacing: 8) {
                     HStack {
-                        Text("アラーム")
+                        Text(language.alarmLabel)
                             .foregroundStyle(.white)
                         Spacer()
                         // ImageRenderer非対応のToggleをカスタム実装
@@ -306,7 +410,7 @@ struct MockNemuHomeView: View {
                             )
                     }
                     .padding(.horizontal, 24)
-                    Text("明日 7:00")
+                    Text(language.tomorrowAlarm)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.4))
                 }
@@ -373,7 +477,7 @@ struct MockWakeScoreView: View {
                         Text(language.sleepDuration)
                             .foregroundStyle(.white.opacity(0.7))
                         Spacer()
-                        Text("7時間23分")
+                        Text(language.sleepDurationFormatted)
                             .foregroundStyle(.white)
                             .bold()
                     }
@@ -381,10 +485,10 @@ struct MockWakeScoreView: View {
                     HStack {
                         Image(systemName: "waveform.path.ecg")
                             .foregroundStyle(.green)
-                        Text("モーション")
+                        Text(language.motionLabel)
                             .foregroundStyle(.white.opacity(0.7))
                         Spacer()
-                        Text("少ない")
+                        Text(language.motionLevel)
                             .foregroundStyle(.green)
                             .bold()
                     }
@@ -399,7 +503,7 @@ struct MockWakeScoreView: View {
                 Spacer()
 
                 Button {} label: {
-                    Text("レポートを見る")
+                    Text(language.viewReportButton)
                         .font(.headline)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -420,7 +524,6 @@ struct MockWakeScoreView: View {
 struct MockNemuReportView: View {
     let language: NemuLanguage
     private let mockScores: [Double] = [72, 85, 60, 90, 78, 82, 88]
-    private let dayLabels = ["月", "火", "水", "木", "金", "土", "日"]
 
     var body: some View {
         ZStack {
@@ -446,10 +549,10 @@ struct MockNemuReportView: View {
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 2) {
-                Text("累計")
+                Text(language.totalLabel)
                     .font(.caption2)
                     .foregroundStyle(Color.assetGold.opacity(0.7))
-                Text("52時間")
+                Text(language.totalHours)
                     .font(.title3.bold())
                     .foregroundStyle(Color.assetGold)
             }
@@ -465,7 +568,7 @@ struct MockNemuReportView: View {
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.5))
                 Spacer()
-                Text("82点")
+                Text(language.scoreUnit)
                     .font(.caption.bold())
                     .foregroundStyle(Color.assetGold)
             }
@@ -477,7 +580,7 @@ struct MockNemuReportView: View {
                     Text(language.gradeLabel)
                         .font(.headline)
                         .foregroundStyle(.white)
-                    Text("7時間23分")
+                    Text(language.sleepDurationFormatted)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.5))
                 }
@@ -499,7 +602,7 @@ struct MockNemuReportView: View {
                 let maxScore = mockScores.max() ?? 100
                 let barWidth = (geo.size.width - CGFloat(mockScores.count - 1) * 8) / CGFloat(mockScores.count)
                 HStack(alignment: .bottom, spacing: 8) {
-                    ForEach(Array(zip(dayLabels, mockScores)), id: \.0) { day, score in
+                    ForEach(Array(zip(language.weekDayLabels, mockScores)), id: \.0) { day, score in
                         VStack(spacing: 4) {
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(score >= 80 ? Color.assetGold : Color.indigo)
@@ -553,11 +656,11 @@ struct MockBedtimeView: View {
                         .font(.system(size: 80))
                         .foregroundStyle(.indigo.opacity(0.8))
 
-                    Text("3時間12分")
+                    Text(language.sleepElapsedFormatted)
                         .font(.system(size: 48, weight: .thin, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
 
-                    Text("目覚まし 7:00")
+                    Text(language.alarmAtTime)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.4))
                 }
@@ -565,7 +668,7 @@ struct MockBedtimeView: View {
                 Spacer()
 
                 Button {} label: {
-                    Label("起床する", systemImage: "sun.max.fill")
+                    Label(language.wakeUpButton, systemImage: "sun.max.fill")
                         .font(.headline)
                         .foregroundStyle(.black)
                         .frame(maxWidth: .infinity)
@@ -664,7 +767,7 @@ struct MockNemuPaywallView: View {
                 .padding(.horizontal)
 
                 Button {} label: {
-                    Text(language.trialLabel + "を始める")
+                    Text(language.startTrialButton)
                         .font(.headline)
                         .foregroundStyle(.black)
                         .frame(maxWidth: .infinity)
