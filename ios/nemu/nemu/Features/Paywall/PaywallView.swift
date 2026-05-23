@@ -15,6 +15,7 @@ import SwiftUI
 
 struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.analyticsClient) private var analytics
     @State private var purchaseService = PurchaseService.shared
     @State private var selectedPlan: PlanType = .yearly
 
@@ -182,7 +183,7 @@ struct PaywallView: View {
             }
         }
         .onAppear {
-            NemuAnalytics.logPaywallView(source: analyticsSource)
+            analytics.logPaywallView(analyticsSource)
         }
     }
 }

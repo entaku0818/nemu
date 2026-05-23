@@ -53,7 +53,7 @@ final class BedtimeViewModel {
     func selectSound(_ sound: SoundType) {
         selectedSound = sound
         stopAudio()
-        NemuAnalytics.logSoundSelected(sound: sound.rawValue)
+        analytics.logSoundSelected(sound.rawValue)
         guard sound != .none else { return }
         playGeneratedSound(sound)
     }
@@ -212,11 +212,11 @@ final class BedtimeViewModel {
                     } catch {
                         self.dbError = "睡眠データの保存に失敗しました: \(error.localizedDescription)"
                     }
-                    NemuAnalytics.logWakeUp(
-                        durationMinutes: Int(self.lastDuration / 60),
-                        score: self.lastScore,
-                        snoreCount: session.snoreTimestamps.count,
-                        motionCount: session.motionEventCount
+                    self.analytics.logWakeUp(
+                        Int(self.lastDuration / 60),
+                        self.lastScore,
+                        session.snoreTimestamps.count,
+                        session.motionEventCount
                     )
                 }
                 SleepMonitorService.shared.stopMonitoring()
@@ -240,11 +240,11 @@ final class BedtimeViewModel {
                 try? context.save()
             } else {
                 try? context.save()
-                NemuAnalytics.logWakeUp(
-                    durationMinutes: Int(lastDuration / 60),
-                    score: lastScore,
-                    snoreCount: session.snoreTimestamps.count,
-                    motionCount: session.motionEventCount
+                analytics.logWakeUp(
+                    Int(lastDuration / 60),
+                    lastScore,
+                    session.snoreTimestamps.count,
+                    session.motionEventCount
                 )
             }
             SleepMonitorService.shared.stopMonitoring()
@@ -255,6 +255,9 @@ final class BedtimeViewModel {
             )
         }
     }
+
+    // MARK: - Analytics
+    var analytics: NemuAnalyticsClient = .live
 
     // MARK: - プレミアム状態
     var isUnlocked: Bool { PurchaseService.shared.isPremium }
@@ -293,7 +296,7 @@ final class BedtimeViewModel {
         restoreScreen()
         if let session = currentSession, let context = modelContext {
             let durationMinutes = Int(Date().timeIntervalSince(session.bedTime) / 60)
-            NemuAnalytics.logBedtimeCancelled(durationMinutes: durationMinutes)
+            analytics.logBedtimeCancelled(durationMinutes)
             currentSession = nil
             context.delete(session)
             try? context.save()

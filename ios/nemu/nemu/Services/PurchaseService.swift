@@ -13,6 +13,7 @@ final class PurchaseService {
     private(set) var isPremium = false
     private(set) var isLoading = false
     var errorMessage: String?
+    var analytics: NemuAnalyticsClient = .live
 
     private init() {}
 
@@ -42,22 +43,22 @@ final class PurchaseService {
         let plan = productId.contains("yearly") ? "yearly" : "monthly"
         isLoading = true
         defer { isLoading = false }
-        NemuAnalytics.logPurchaseStarted(plan: plan)
+        analytics.logPurchaseStarted(plan)
         do {
             let products = try await Purchases.shared.products([productId])
             guard let product = products.first else {
                 errorMessage = "商品が見つかりませんでした"
-                NemuAnalytics.logPurchaseFailed(plan: plan)
+                analytics.logPurchaseFailed(plan)
                 return
             }
             let (_, info, _) = try await Purchases.shared.purchase(product: product)
             isPremium = info.entitlements["premium"]?.isActive == true
             if isPremium {
-                NemuAnalytics.logPurchaseCompleted(plan: plan)
+                analytics.logPurchaseCompleted(plan)
             }
         } catch {
             errorMessage = "購入に失敗しました"
-            NemuAnalytics.logPurchaseFailed(plan: plan)
+            analytics.logPurchaseFailed(plan)
         }
     }
 
@@ -68,7 +69,7 @@ final class PurchaseService {
             let info = try await Purchases.shared.restorePurchases()
             isPremium = info.entitlements["premium"]?.isActive == true
             if isPremium {
-                NemuAnalytics.logPurchaseRestored()
+                analytics.logPurchaseRestored()
             } else {
                 errorMessage = "有効なサブスクリプションが見つかりませんでした"
             }

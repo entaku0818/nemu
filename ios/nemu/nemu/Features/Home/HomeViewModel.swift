@@ -38,6 +38,8 @@ final class HomeViewModel {
         return "\(f.string(from: alarm.wakeTime)) に起こします"
     }
 
+    var analytics: NemuAnalyticsClient = .live
+
     private var modelContext: ModelContext?
 
     func setup(modelContext: ModelContext) {
@@ -76,7 +78,7 @@ final class HomeViewModel {
         isBedtimeMode = true
         scheduleEnabledAlarms()
         let wakeHour = Calendar.current.component(.hour, from: nextAlarmSetting?.wakeTime ?? Date())
-        NemuAnalytics.logBedtimeStart(scheduledWakeHour: wakeHour)
+        analytics.logBedtimeStart(wakeHour)
     }
 
     private func scheduleEnabledAlarms() {

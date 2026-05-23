@@ -9,6 +9,7 @@ import Charts
 
 struct ReportView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.analyticsClient) private var analytics
     @State private var viewModel = ReportViewModel()
 
     var body: some View {
@@ -65,7 +66,7 @@ struct ReportView: View {
         }
         .onAppear {
             viewModel.setup(modelContext: modelContext)
-            NemuAnalytics.logReportView()
+            analytics.logReportView()
         }
         .onReceive(NotificationCenter.default.publisher(for: .didWakeUp)) { _ in
             viewModel.setup(modelContext: modelContext)
