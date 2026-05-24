@@ -62,4 +62,24 @@ final class ReportViewModel {
         guard let context = modelContext else { return [] }
         return SleepSessionRepository(context: context).weeklyScores()
     }
+
+    // MARK: - CSVエクスポート
+
+    var csvString: String {
+        var lines = ["日付,就寝時刻,起床時刻,睡眠時間(分),スコア,体動回数,いびき回数"]
+        let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "ja_JP")
+        fmt.dateFormat = "yyyy/MM/dd"
+        let timeFmt = DateFormatter()
+        timeFmt.locale = Locale(identifier: "ja_JP")
+        timeFmt.dateFormat = "HH:mm"
+        for s in allSessions {
+            let date = fmt.string(from: s.bedTime)
+            let bed = timeFmt.string(from: s.bedTime)
+            let wake = s.wakeTime.map { timeFmt.string(from: $0) } ?? ""
+            let mins = Int(s.duration / 60)
+            lines.append("\(date),\(bed),\(wake),\(mins),\(s.score),\(s.motionEventCount),\(s.snoreTimestamps.count)")
+        }
+        return lines.joined(separator: "\n")
+    }
 }

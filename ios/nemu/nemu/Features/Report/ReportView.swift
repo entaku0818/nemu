@@ -11,6 +11,10 @@ struct ReportView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.analyticsClient) private var analytics
     @State private var viewModel = ReportViewModel()
+    @State private var showPaywall = false
+    @State private var purchaseService = PurchaseService.shared
+
+    private let historyLimit = 7
 
     var body: some View {
         ZStack {
@@ -30,7 +34,6 @@ struct ReportView: View {
                                 .foregroundStyle(.white.opacity(0.4))
                         }
                         Spacer()
-                        // 累計睡眠時間バッジ
                         if !viewModel.allSessions.isEmpty {
                             TotalAssetBadge(totalHours: viewModel.totalSleepHours)
                         }
@@ -50,19 +53,54 @@ struct ReportView: View {
 
                     // 履歴リスト
                     if !viewModel.allSessions.isEmpty {
-                        SessionHistoryCard(sessions: Array(viewModel.allSessions.prefix(7)))
+                        let visibleSessions = purchaseService.isPremium
+                            ? viewModel.allSessions
+                            : Array(viewModel.allSessions.prefix(historyLimit))
+                        let hasMore = !purchaseService.isPremium && viewModel.allSessions.count > historyLimit
+
+                        SessionHistoryCard(
+                            sessions: visibleSessions,
+                            hasMore: hasMore,
+                            onUnlock: { showPaywall = true }
+                        )
+
+                        // CSVエクスポート（プレミアムのみ）
+                        if purchaseService.isPremium {
+                            ShareLink(
+                                item: viewModel.csvString,
+                                preview: SharePreview("睡眠データ.csv")
+                            ) {
+                                Label("CSVでエクスポート", systemImage: "square.and.arrow.up")
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color.assetGold)
+                                    .padding(.vertical, 12)
+                                    .frame(maxWidth: .infinity)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.assetGold.opacity(0.1))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 12)
+                                                    .strokeBorder(Color.assetGold.opacity(0.3), lineWidth: 1)
+                                            )
+                                    )
+                            }
+                            .padding(.horizontal)
+                        }
                     }
 
                     Spacer(minLength: 40)
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                if !PurchaseService.shared.isPremium {
+                if !purchaseService.isPremium {
                     BannerAdView()
                         .frame(height: 50)
                         .background(Color.appBackground)
                 }
             }
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(sessions: viewModel.allSessions)
         }
         .onAppear {
             viewModel.setup(modelContext: modelContext)
@@ -320,6 +358,8 @@ struct WeeklyChartCard: View {
 
 struct SessionHistoryCard: View {
     let sessions: [SleepSession]
+    var hasMore: Bool = false
+    var onUnlock: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -348,6 +388,29 @@ struct SessionHistoryCard: View {
                 if session.id != sessions.last?.id {
                     Divider()
                         .background(Color.white.opacity(0.1))
+                }
+            }
+
+            if hasMore {
+                Divider().background(Color.white.opacity(0.1))
+                Button {
+                    onUnlock?()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "lock.fill")
+                            .font(.caption)
+                        Text("8日以前の履歴を見る")
+                            .font(.subheadline)
+                        Spacer()
+                        Text("プレミアム")
+                            .font(.caption.bold())
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Capsule().fill(Color.assetGold))
+                    }
+                    .foregroundStyle(Color.assetGold)
+                    .padding(.top, 4)
                 }
             }
         }

@@ -112,9 +112,10 @@ struct PaywallView: View {
 
                         // プレミアム特典リスト
                         VStack(spacing: 12) {
+                            PaywallFeatureRow(icon: "chart.line.uptrend.xyaxis",  text: "全睡眠履歴に無制限アクセス")
+                            PaywallFeatureRow(icon: "square.and.arrow.up",        text: "CSVでデータをエクスポート")
                             PaywallFeatureRow(icon: "waveform",                   text: "全ての自然音が使い放題")
-                            PaywallFeatureRow(icon: "chart.line.uptrend.xyaxis",  text: "30日以上の詳細な睡眠履歴")
-                            PaywallFeatureRow(icon: "bell.badge.fill",            text: "スマートアラームで最適覚醒")
+                            PaywallFeatureRow(icon: "xmark.circle",               text: "広告なしで快適に使える")
                         }
                         .padding(.horizontal)
 
