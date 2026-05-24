@@ -1,4 +1,4 @@
-Slumber turns your sleep into a growing asset — track, score, and build your sleep history night after night.
+nemu turns your sleep into a growing asset — track, score, and build your sleep history night after night.
 
 Wake up feeling refreshed with smart alarms, and watch your sleep asset grow over time.
 
