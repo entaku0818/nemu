@@ -18,7 +18,7 @@ struct nemuApp: App {
     init() {
         FirebaseApp.configure()
         GADMobileAds.sharedInstance().start(completionHandler: nil)
-        PurchaseService.shared.configure(apiKey: "test_LAnKSaVFRyHSLPjqTdyliVgJBkY")
+        PurchaseService.shared.configure(apiKey: "appl_iVuNDjtHBbFeIYSwAtqapteaYkb")
     }
 
     var body: some Scene {
