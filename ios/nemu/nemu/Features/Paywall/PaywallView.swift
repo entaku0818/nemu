@@ -139,7 +139,7 @@ struct PaywallView: View {
                                     if purchaseService.isLoading {
                                         ProgressView().tint(.white)
                                     } else {
-                                        Text(selectedPlan == .yearly ? "14日間 無料で始める" : "月額プランで始める")
+                                        Text("7日間 無料で始める")
                                     }
                                 }
                                 .font(.headline)
@@ -153,12 +153,12 @@ struct PaywallView: View {
                             }
                             .disabled(purchaseService.isLoading)
 
-                            if selectedPlan == .yearly {
-                                Text("14日後、年額 ¥2,900 が自動更新されます")
-                                    .font(.caption2)
-                                    .multilineTextAlignment(.center)
-                                    .foregroundStyle(.white.opacity(0.3))
-                            }
+                            Text(selectedPlan == .yearly
+                                ? "7日後、年額 ¥2,900 が自動更新されます"
+                                : "7日後、月額 ¥480 が自動更新されます")
+                                .font(.caption2)
+                                .multilineTextAlignment(.center)
+                                .foregroundStyle(.white.opacity(0.3))
 
                             if let error = purchaseService.errorMessage {
                                 Text(error)
@@ -350,7 +350,7 @@ private struct PlanSelector: View {
                 title: "年額プラン",
                 price: "¥2,900",
                 period: "/ 年",
-                note: "¥242 / 月 · 14日間無料トライアル"
+                note: "¥242 / 月 · 7日間無料トライアル"
             ) { selectedPlan = .yearly }
 
             PlanCard(
@@ -359,7 +359,7 @@ private struct PlanSelector: View {
                 title: "月額プラン",
                 price: "¥480",
                 period: "/ 月",
-                note: "トライアルなし · いつでもキャンセル可"
+                note: "7日間無料トライアル · いつでもキャンセル可"
             ) { selectedPlan = .monthly }
         }
     }
