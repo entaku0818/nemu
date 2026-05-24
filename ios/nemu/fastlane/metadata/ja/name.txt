@@ -1,1 +1,1 @@
-ねむ - スマート睡眠管理
+Slumber - Sleep & Alarm
