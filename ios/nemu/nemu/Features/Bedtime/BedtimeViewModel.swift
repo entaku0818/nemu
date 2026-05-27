@@ -54,7 +54,6 @@ final class BedtimeViewModel {
         selectedSound = sound
         stopAudio()
         analytics.logSoundSelected(sound.rawValue)
-        guard sound != .none else { return }
         playGeneratedSound(sound)
     }
 
@@ -117,6 +116,9 @@ final class BedtimeViewModel {
     private func stopAudio() {
         audioEngine?.stop()
         audioEngine = nil
+    }
+
+    private func deactivateAudioSession() {
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 
@@ -160,12 +162,16 @@ final class BedtimeViewModel {
         }
         self.currentSession = session
         SleepMonitorService.shared.startMonitoring(bedTime: now)
+        // audio バックグラウンドモードを有効化するため、常にエンジンを起動する
+        // .none 選択時は無音（振幅0）で audio セッションを維持し、iOS にアプリを生かし続けてもらう
+        playGeneratedSound(selectedSound)
     }
 
     func endSession() {
         guard let session = currentSession, let context = modelContext else { return }
         currentSession = nil
         stopAudio()
+        deactivateAudioSession()
 
         let bedTime = sessionBedTime ?? session.bedTime
         let wakeTime = Date()
@@ -293,6 +299,7 @@ final class BedtimeViewModel {
         guard !isFinished else { return }
         isFinished = true
         stopAudio()
+        deactivateAudioSession()
         restoreScreen()
         if let session = currentSession, let context = modelContext {
             let durationMinutes = Int(Date().timeIntervalSince(session.bedTime) / 60)
