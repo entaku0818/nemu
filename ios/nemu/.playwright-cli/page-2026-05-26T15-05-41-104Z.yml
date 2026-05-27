@@ -1,0 +1,40 @@
+- generic [ref=e3]:
+  - navigation [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e9]:
+        - img
+      - generic [ref=e14]:
+        - img
+        - generic: 検索
+        - searchbox "検索" [ref=e15]
+    - list [ref=e19]
+  - generic [ref=e20]:
+    - main [ref=e21]
+    - generic [ref=e33]:
+      - generic [ref=e35]:
+        - button "日本" [ref=e36] [cursor=pointer]
+        - list [ref=e37]:
+          - listitem [ref=e38]:
+            - link "このページはEnglish (US)で表示できます" [ref=e39] [cursor=pointer]:
+              - /url: "?l=en-US"
+              - text: English (US)
+      - generic [ref=e40]:
+        - paragraph [ref=e41]:
+          - generic [ref=e42]:
+            - text: Copyright © 2026
+            - link "Apple Inc." [ref=e43] [cursor=pointer]:
+              - /url: https://www.apple.com/jp
+          - text: All rights reserved.
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "インターネットサービス利用規約" [ref=e46] [cursor=pointer]:
+              - /url: https://www.apple.com/jp/legal/internet-services/
+          - listitem [ref=e47]:
+            - link "App Storeとプライバシー" [ref=e48] [cursor=pointer]:
+              - /url: https://www.apple.com/legal/privacy/data/ja/app-store/
+          - listitem [ref=e49]:
+            - link "Cookieに関する警告" [ref=e50] [cursor=pointer]:
+              - /url: https://www.apple.com/jp/legal/privacy/jp/cookies/
+          - listitem [ref=e51]:
+            - link "サポート" [ref=e52] [cursor=pointer]:
+              - /url: https://support.apple.com/ja-jp/billing

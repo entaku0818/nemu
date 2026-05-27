@@ -1,0 +1,2 @@
+[    1186ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://app.revenuecat.com/v1/developers/login/refresh-token:0
+[    1228ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://app.revenuecat.com/v1/developers/me:0

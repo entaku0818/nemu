@@ -1,0 +1,32 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e37]:
+    - link "RevenueCat" [ref=e39] [cursor=pointer]:
+      - /url: https://www.revenuecat.com/
+      - img [ref=e40]
+    - generic [ref=e46]:
+      - generic [ref=e49]:
+        - generic [ref=e50]:
+          - heading "Log in" [level=2] [ref=e51]
+          - paragraph [ref=e52]: Welcome back! Please enter your email and password to continue.
+        - generic [ref=e54]:
+          - generic [ref=e56]: Email
+          - generic [ref=e59]:
+            - textbox "Email" [ref=e60]:
+              - /placeholder: email@example.com
+            - group
+        - generic [ref=e61]:
+          - link "Sign up" [ref=e62] [cursor=pointer]:
+            - /url: /signup
+          - button "Log in" [disabled]
+      - paragraph [ref=e63]:
+        - link "Terms and conditions" [ref=e64] [cursor=pointer]:
+          - /url: https://www.revenuecat.com/terms
+        - separator [ref=e65]: ·
+        - link "Privacy policy" [ref=e66] [cursor=pointer]:
+          - /url: https://www.revenuecat.com/privacy
+        - separator [ref=e67]: ·
+        - link "RevenueCat Status" [ref=e68] [cursor=pointer]:
+          - /url: https://status.revenuecat.com/
+        - separator [ref=e69]: ·
+        - button "Manage cookies" [ref=e70] [cursor=pointer]

@@ -1,0 +1,43 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e153]:
+    - link "RevenueCat" [ref=e155] [cursor=pointer]:
+      - /url: https://www.revenuecat.com/
+      - img [ref=e156]
+    - generic [ref=e163]:
+      - generic [ref=e166]:
+        - generic [ref=e167]:
+          - heading "Log in" [level=2] [ref=e168]
+          - paragraph [ref=e169]: Welcome back! Please enter your email and password to continue.
+        - generic [ref=e171]:
+          - generic [ref=e173]: Email
+          - generic [ref=e176]:
+            - textbox "Email" [ref=e177]:
+              - /placeholder: email@example.com
+            - group
+        - generic [ref=e178]:
+          - link "Sign up" [ref=e179] [cursor=pointer]:
+            - /url: /signup
+          - button "Log in" [disabled]
+      - paragraph [ref=e180]:
+        - link "Terms and conditions" [ref=e181] [cursor=pointer]:
+          - /url: https://www.revenuecat.com/terms
+        - separator [ref=e182]: ·
+        - link "Privacy policy" [ref=e183] [cursor=pointer]:
+          - /url: https://www.revenuecat.com/privacy
+        - separator [ref=e184]: ·
+        - link "RevenueCat Status" [ref=e185] [cursor=pointer]:
+          - /url: https://status.revenuecat.com/
+        - separator [ref=e186]: ·
+        - button "Manage cookies" [ref=e187] [cursor=pointer]
+  - dialog [ref=e247]:
+    - heading "Have a cookie?" [level=2] [ref=e248]
+    - generic [ref=e251]:
+      - text: RevenueCat and our partners use cookies and trackers to improve and market the product. Learn more in our
+      - link "privacy policy" [active] [ref=e252] [cursor=pointer]:
+        - /url: https://www.revenuecat.com/privacy
+      - text: .
+    - generic [ref=e253]:
+      - button "Agree to all" [ref=e254] [cursor=pointer]
+      - button "Customize" [ref=e255] [cursor=pointer]
+      - button "Reject all" [ref=e256] [cursor=pointer]

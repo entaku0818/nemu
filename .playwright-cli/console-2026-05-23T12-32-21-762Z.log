@@ -1,0 +1,5 @@
+[    1196ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://app.revenuecat.com/v1/developers/me:0
+[    1221ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://app.revenuecat.com/v1/developers/login/refresh-token:0
+[    1680ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://app.revenuecat.com/v1/developers/me:0
+[    3865ms] [ERROR] Access to XMLHttpRequest at 'https://px.ads.linkedin.com/attribution_trigger?pid=3183714&time=1779539545403&url=https%3A%2F%2Fapp.revenuecat.com%2Flogin' from origin 'https://app.revenuecat.com' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ https://app.revenuecat.com/login:0
+[    3865ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://px.ads.linkedin.com/attribution_trigger?pid=3183714&time=1779539545403&url=https%3A%2F%2Fapp.revenuecat.com%2Flogin:0
