@@ -96,20 +96,38 @@ final class AlarmService {
             let _ = try await AlarmManager.shared.schedule(id: id, configuration: configuration)
             scheduledAlarmID = id
             analytics.logAlarmSet(hour, minute, !repeatDays.isEmpty)
+            #if DEBUG
+            let scheduleDesc = repeatDays.isEmpty ? "fixed(\(date))" : "weekly(days:\(repeatDays.sorted()))"
+            AlarmLogger.shared.log("✅ scheduleAlarm: \(hour):\(String(format: "%02d", minute))  schedule=\(scheduleDesc)  id=\(id.uuidString.prefix(8))", level: .success)
+            #endif
         } catch {
             errorMessage = error.localizedDescription
+            #if DEBUG
+            AlarmLogger.shared.log("❌ scheduleAlarm failed: \(error.localizedDescription)", level: .error)
+            #endif
         }
     }
 
     // MARK: - キャンセル
 
     func cancelAlarm() async {
-        guard let id = scheduledAlarmID else { return }
+        guard let id = scheduledAlarmID else {
+            #if DEBUG
+            AlarmLogger.shared.log("⚠️ cancelAlarm: scheduledAlarmID が nil のためスキップ")
+            #endif
+            return
+        }
         do {
             try AlarmManager.shared.cancel(id: id)
+            #if DEBUG
+            AlarmLogger.shared.log("🗑 cancelAlarm: id=\(id.uuidString.prefix(8))")
+            #endif
             scheduledAlarmID = nil
         } catch {
             errorMessage = error.localizedDescription
+            #if DEBUG
+            AlarmLogger.shared.log("❌ cancelAlarm failed: \(error.localizedDescription)", level: .error)
+            #endif
         }
     }
 
@@ -117,8 +135,14 @@ final class AlarmService {
         do {
             try AlarmManager.shared.cancel(id: id)
             if scheduledAlarmID == id { scheduledAlarmID = nil }
+            #if DEBUG
+            AlarmLogger.shared.log("🗑 cancelAlarm(id): id=\(id.uuidString.prefix(8))")
+            #endif
         } catch {
             errorMessage = error.localizedDescription
+            #if DEBUG
+            AlarmLogger.shared.log("❌ cancelAlarm(id) failed: id=\(id.uuidString.prefix(8))  \(error.localizedDescription)", level: .error)
+            #endif
         }
     }
 
@@ -178,9 +202,17 @@ final class AlarmService {
             let id = UUID()
             let _ = try await AlarmManager.shared.schedule(id: id, configuration: configuration)
             analytics.logAlarmSet(hour, minute, !repeatDays.isEmpty)
+            #if DEBUG
+            let scheduleDesc = repeatDays.isEmpty ? "fixed(\(date))" : "weekly(days:\(repeatDays.sorted()))"
+            let oldIDDesc = existingID.map { String($0.uuidString.prefix(8)) } ?? "nil"
+            AlarmLogger.shared.log("✅ scheduleAlarm(existingID): \(hour):\(String(format: "%02d", minute))  schedule=\(scheduleDesc)  oldID=\(oldIDDesc)  newID=\(id.uuidString.prefix(8))", level: .success)
+            #endif
             return id
         } catch {
             errorMessage = error.localizedDescription
+            #if DEBUG
+            AlarmLogger.shared.log("❌ scheduleAlarm(existingID) failed: \(error.localizedDescription)", level: .error)
+            #endif
             return nil
         }
     }

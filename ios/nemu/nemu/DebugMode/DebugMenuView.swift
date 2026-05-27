@@ -23,6 +23,7 @@ struct DebugMenuView: View {
     @State private var settings = DebugSettings.shared
     @State private var showScreenshotPreview = false
     @State private var monitor = SleepMonitorService.shared
+    @State private var alarmLogger = AlarmLogger.shared
 
     var body: some View {
         NavigationStack {
@@ -80,6 +81,31 @@ struct DebugMenuView: View {
                     }
                 } header: {
                     Text("開発ツール")
+                }
+
+                Section {
+                    NavigationLink {
+                        AlarmLogView()
+                    } label: {
+                        HStack {
+                            Text("アラームログ")
+                                .font(.subheadline)
+                            Spacer()
+                            if !alarmLogger.entries.isEmpty {
+                                Text("\(alarmLogger.entries.count)")
+                                    .font(.caption2.bold())
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 7)
+                                    .padding(.vertical, 3)
+                                    .background(Capsule().fill(Color.orange))
+                            }
+                        }
+                    }
+                } header: {
+                    Text("アラーム")
+                } footer: {
+                    Text("AlarmService の schedule / cancel / 発火を記録します。")
+                        .font(.caption2)
                 }
             }
             .navigationTitle("デバッグ")
