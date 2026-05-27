@@ -127,6 +127,25 @@ struct SettingsView: View {
                         )
                     }
 
+                    // サポート
+                    SettingsSection(title: "サポート") {
+                        Link(destination: URL(string: "mailto:entaku0818@gmail.com?subject=Slumber%20%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B&body=%E3%82%A2%E3%83%97%E3%83%AA%E3%83%90%E3%83%BC%E3%82%B8%E3%83%A7%E3%83%B3%3A%20\(appVersion)%0A%0A%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B%E5%86%85%E5%AE%B9%3A%0A")!) {
+                            SettingsRow(icon: "envelope.fill", iconColor: .indigo, title: "お問い合わせ") {
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.white.opacity(0.3))
+                            }
+                        }
+                        Divider().background(Color.white.opacity(0.08)).padding(.leading, 56)
+                        Link(destination: URL(string: "https://entaku0818.github.io/nemu/privacy")!) {
+                            SettingsRow(icon: "lock.shield.fill", iconColor: .indigo, title: "プライバシーポリシー") {
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.white.opacity(0.3))
+                            }
+                        }
+                    }
+
                     // アプリ情報
                     SettingsSection(title: "アプリ情報") {
                         SettingsRow(
