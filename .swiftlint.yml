@@ -1,0 +1,29 @@
+# SwiftLint configuration for Nemu
+# Lints the iOS app sources. Kept lenient so CI flags real issues without
+# blocking on stylistic noise; tighten over time as the codebase stabilizes.
+
+included:
+  - ios/nemu/nemu
+  - ios/nemu/NemuWidget
+  - ios/nemu/nemuTests
+  - ios/nemu/nemuUITests
+
+excluded:
+  - ios/nemu/build
+  - ios/nemu/fastlane
+  - "**/*.generated.swift"
+
+# Rules that tend to be noisy on an existing codebase are disabled for now.
+disabled_rules:
+  - trailing_whitespace
+  - todo
+  - line_length
+  - function_body_length
+  - type_body_length
+  - file_length
+  - cyclomatic_complexity
+  - identifier_name
+  - force_cast
+  - force_try
+
+reporter: "github-actions-logging"

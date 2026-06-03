@@ -1,0 +1,88 @@
+name: CI
+
+# Harness gates for the Nemu iOS app:
+#   - SwiftLint runs on every push / PR
+#   - The app is built and the unit/UI test suite is run on PRs
+# Lint and build/test are independent jobs so a lint failure still lets the
+# build signal surface (and vice versa).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: ios/nemu
+
+jobs:
+  swiftlint:
+    name: SwiftLint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run SwiftLint
+        uses: docker://ghcr.io/realm/swiftlint:latest
+        with:
+          args: swiftlint lint --config .swiftlint.yml
+
+  build-test:
+    name: Build & Test
+    # iOS deployment target is 26.x, which requires the Xcode 26 toolchain.
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select latest Xcode
+        run: sudo xcode-select -switch /Applications/Xcode.app
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Install xcbeautify
+        run: brew list xcbeautify >/dev/null 2>&1 || brew install xcbeautify
+
+      - name: Resolve Swift packages
+        run: xcodebuild -resolvePackageDependencies -project nemu.xcodeproj -scheme nemu
+
+      - name: Pick an iOS Simulator
+        id: sim
+        run: |
+          # Choose the newest available iPhone simulator on the runner.
+          UDID=$(xcrun simctl list devices available --json \
+            | python3 -c "import sys,json; d=json.load(sys.stdin)['devices']; \
+              cands=[dev for runtime,devs in d.items() if 'iOS' in runtime for dev in devs if dev.get('isAvailable') and 'iPhone' in dev['name']]; \
+              print(cands[-1]['udid'] if cands else '')")
+          if [ -z "$UDID" ]; then echo 'No iOS simulator available' >&2; exit 1; fi
+          echo "Using simulator $UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Build & test
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project nemu.xcodeproj \
+            -scheme nemu \
+            -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
+            -resultBundlePath TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcbeautify
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: ios/nemu/TestResults.xcresult
+          if-no-files-found: ignore
