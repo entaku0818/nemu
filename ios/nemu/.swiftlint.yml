@@ -1,0 +1,26 @@
+included:
+  - nemu
+  - NemuWidget
+  - nemuTests
+  - nemuUITests
+
+excluded:
+  - build
+
+# 既存コードを変更せずゲートを通すための緩和設定。
+# 新規コードの品質は warning で可視化しつつ、error（CI 失敗）は明確な逸脱のみに限定する。
+disabled_rules:
+  - identifier_name # SwiftUI の座標計算等で x, y などの短い変数名を許容
+  - type_name # nemuApp など小文字始まりの既存型名を許容
+
+line_length:
+  warning: 200
+  error: 400
+
+file_length:
+  warning: 600
+  error: 1200
+
+function_body_length:
+  warning: 80
+  error: 200
