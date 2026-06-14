@@ -16,7 +16,7 @@ jobs:
     container:
       image: ghcr.io/realm/swiftlint:latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Run SwiftLint
         working-directory: ios/nemu
         run: swiftlint lint --reporter github-actions-logging
@@ -26,7 +26,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Select latest Xcode 26
         run: |
@@ -47,6 +47,9 @@ jobs:
           fi
           echo "device=$DEVICE" >> "$GITHUB_OUTPUT"
           echo "Selected simulator: $DEVICE"
+
+      - name: Install xcbeautify
+        run: brew install xcbeautify
 
       - name: Build and run unit tests
         run: |
