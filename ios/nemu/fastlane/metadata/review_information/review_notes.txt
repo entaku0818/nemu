@@ -1,0 +1,19 @@
+Terms of Use (EULA) and Privacy Policy links are available in two locations:
+
+1. App Description (both ja and en-US):
+   - Terms of Use: https://nemu-sleep-app.web.app/terms
+   - Privacy Policy: https://nemu-sleep-app.web.app/privacy
+
+2. Within the app:
+   - Settings tab → Support section → "利用規約" (Terms of Use) row
+   - Settings tab → Support section → "プライバシーポリシー" (Privacy Policy) row
+   - Paywall/subscription screen → bottom links "利用規約" and "プライバシーポリシー"
+
+Subscription information:
+- Monthly Plan: ¥480/month with 7-day free trial
+- Yearly Plan: ¥2,900/year with 7-day free trial
+- Auto-renews unless cancelled 24 hours before end of period
+- Manage via Apple ID Settings
+
+No login required. No external accounts needed.
+External services: RevenueCat (IAP), Firebase Analytics/Crashlytics/AppCheck, Google AdMob+UMP, HealthKit, AlarmKit.

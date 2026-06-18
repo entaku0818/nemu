@@ -48,10 +48,13 @@ platform :ios do
 
   desc "Submit for App Store review"
   lane :submit_build do
+    notes_path = './fastlane/metadata/review_information/review_notes.txt'
+    review_notes = File.exist?(notes_path) ? File.read(notes_path) : nil
+
     deliver(
       skip_binary_upload: true,
       skip_screenshots: true,
-      skip_metadata: true,
+      skip_metadata: false,
       force: true,
       submit_for_review: true,
       automatic_release: false,
@@ -60,6 +63,9 @@ platform :ios do
       submission_information: {
         export_compliance_uses_encryption: false,
         add_id_info_uses_idfa: false
+      },
+      app_review_information: {
+        notes: review_notes
       }
     )
   end
