@@ -137,7 +137,15 @@ struct SettingsView: View {
                             }
                         }
                         Divider().background(Color.white.opacity(0.08)).padding(.leading, 56)
-                        Link(destination: URL(string: "https://entaku0818.github.io/nemu/privacy")!) {
+                        Link(destination: URL(string: "https://nemu-sleep-app.web.app/terms")!) {
+                            SettingsRow(icon: "doc.text.fill", iconColor: .indigo, title: "利用規約") {
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.white.opacity(0.3))
+                            }
+                        }
+                        Divider().background(Color.white.opacity(0.08)).padding(.leading, 56)
+                        Link(destination: URL(string: "https://nemu-sleep-app.web.app/privacy")!) {
                             SettingsRow(icon: "lock.shield.fill", iconColor: .indigo, title: "プライバシーポリシー") {
                                 Image(systemName: "arrow.up.right")
                                     .font(.caption)
