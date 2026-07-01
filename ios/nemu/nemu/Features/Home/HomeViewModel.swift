@@ -18,6 +18,9 @@ final class HomeViewModel {
     var streakDays: Int = 0
     var totalSleepHours: Int = 0
 
+    // アプリ強制終了で未完了になったセッションの復元
+    var incompleteSession: SleepSession?
+
     // 次のアラーム（AlarmListViewのDBから読む）
     var nextAlarmSetting: AlarmSetting?
 
@@ -40,12 +43,21 @@ final class HomeViewModel {
 
     var analytics: NemuAnalyticsClient = .live
 
+    var incompleteSessionMessage: String {
+        guard let session = incompleteSession else { return "" }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ja_JP")
+        formatter.dateFormat = "M/d HH:mm"
+        return "就寝開始: \(formatter.string(from: session.bedTime))\nアプリが終了していたため記録が保存されていません。"
+    }
+
     private var modelContext: ModelContext?
 
     func setup(modelContext: ModelContext) {
         self.modelContext = modelContext
         loadNextAlarm()
         loadSleepStats()
+        checkForIncompleteSession()
     }
 
     func reload() {
@@ -73,6 +85,56 @@ final class HomeViewModel {
         totalSleepHours = repo.totalSleepHours()
         streakDays = repo.streak()
     }
+
+    // MARK: - Incomplete Session Recovery
+
+    private func checkForIncompleteSession() {
+        guard let context = modelContext,
+              let bedTime = SleepSessionFinalizer.activeBedTime() else {
+            incompleteSession = nil
+            return
+        }
+        let descriptor = FetchDescriptor<SleepSession>()
+        let sessions = (try? context.fetch(descriptor)) ?? []
+        incompleteSession = sessions.first {
+            abs($0.bedTime.timeIntervalSince(bedTime)) < 1 && $0.wakeTime == nil
+        }
+        if incompleteSession == nil {
+            SleepSessionFinalizer.clearActive()
+        }
+    }
+
+    func finalizeIncompleteSession() {
+        guard let session = incompleteSession, let context = modelContext else { return }
+        incompleteSession = nil
+
+        // アラームで起きた場合は「起きた！」ボタンを押した時刻を使う（より正確）
+        let alarmTimestamp = UserDefaults.standard.double(forKey: "alarmKitWakeTimestamp")
+        let wakeTime: Date
+        if alarmTimestamp > 0 {
+            wakeTime = Date(timeIntervalSince1970: alarmTimestamp)
+            UserDefaults.standard.removeObject(forKey: "alarmKitWakeTimestamp")
+        } else {
+            wakeTime = Date()
+        }
+
+        Task {
+            await SleepSessionFinalizer.finalize(session, wakeTime: wakeTime, context: context)
+            loadSleepStats()
+        }
+    }
+
+    func discardIncompleteSession() {
+        guard let session = incompleteSession, let context = modelContext else {
+            SleepSessionFinalizer.clearActive()
+            incompleteSession = nil
+            return
+        }
+        incompleteSession = nil
+        SleepSessionFinalizer.discard(session, context: context)
+    }
+
+    // MARK: - Bedtime
 
     func startBedtime() {
         isBedtimeMode = true

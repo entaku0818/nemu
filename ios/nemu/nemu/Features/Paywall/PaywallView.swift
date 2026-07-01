@@ -175,6 +175,14 @@ struct PaywallView: View {
                                     .foregroundStyle(.white.opacity(0.4))
                                     .underline()
                             }
+
+                            HStack(spacing: 16) {
+                                Link("利用規約", destination: URL(string: "https://nemu-sleep-app.web.app/terms")!)
+                                Text("·").foregroundStyle(.white.opacity(0.2))
+                                Link("プライバシーポリシー", destination: URL(string: "https://nemu-sleep-app.web.app/privacy")!)
+                            }
+                            .font(.caption2)
+                            .foregroundStyle(.white.opacity(0.3))
                         }
                         .padding(.horizontal)
 

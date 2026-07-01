@@ -42,6 +42,7 @@ final class PurchaseService {
     private func purchase(productId: String) async {
         let plan = productId.contains("yearly") ? "yearly" : "monthly"
         isLoading = true
+        errorMessage = nil
         defer { isLoading = false }
         analytics.logPurchaseStarted(plan)
         do {

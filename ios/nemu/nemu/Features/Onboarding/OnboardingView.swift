@@ -55,15 +55,6 @@ struct OnboardingView: View {
     @ViewBuilder
     private var bottomButtons: some View {
         VStack(spacing: 12) {
-            if viewModel.currentPage == .permissions {
-                Button("あとで設定する") {
-                    viewModel.skipPermissions()
-                }
-                .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.4))
-                .transition(.opacity)
-            }
-
             Button {
                 if viewModel.isLastPage {
                     viewModel.trackCompleted()
@@ -395,7 +386,7 @@ private struct PermissionRow: View {
             Spacer()
 
             Button(action: action) {
-                Text(status ? "許可済み" : "許可する")
+                Text(status ? "許可済み" : "続ける")
                     .font(.caption.bold())
                     .foregroundStyle(status ? .white.opacity(0.5) : .white)
                     .padding(.horizontal, 12)

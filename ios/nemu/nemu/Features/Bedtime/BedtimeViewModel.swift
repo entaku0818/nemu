@@ -161,7 +161,9 @@ final class BedtimeViewModel {
             return
         }
         self.currentSession = session
+        SleepSessionFinalizer.markActive(bedTime: now)
         SleepMonitorService.shared.startMonitoring(bedTime: now)
+        Task { await BedtimeReminderService.shared.scheduleWakeCheck(after: wakeTime) }
         // audio バックグラウンドモードを有効化するため、常にエンジンを起動する
         // .none 選択時は無音（振幅0）で audio セッションを維持し、iOS にアプリを生かし続けてもらう
         playGeneratedSound(selectedSound)
@@ -175,15 +177,12 @@ final class BedtimeViewModel {
 
         let bedTime = sessionBedTime ?? session.bedTime
         let wakeTime = Date()
-        session.wakeTime = wakeTime
 
         #if DEBUG
         if DebugSettings.shared.timeAcceleration {
             let actualDuration = wakeTime.timeIntervalSince(bedTime)
             let fakeBedTime = wakeTime.addingTimeInterval(-actualDuration * 60)
-            // bedTime を60倍スケール後の値に差し替え
             session.bedTime = fakeBedTime
-            // motion / snore のタイムスタンプも同比率でスケール
             session.motionTimestamps = session.motionTimestamps.map { ts in
                 fakeBedTime.addingTimeInterval(ts.timeIntervalSince(bedTime) * 60)
             }
@@ -193,67 +192,24 @@ final class BedtimeViewModel {
         }
         #endif
 
-        // CoreMotion 過去データを照会してモーションイベントをカウント
-        // （バックグラウンド中も蓄積されたデータを確実に取得）
-        if CMMotionActivityManager.isActivityAvailable() {
-            let mgr = CMMotionActivityManager()
-            mgr.queryActivityStarting(from: bedTime, to: wakeTime, to: .main) { [weak self] activities, _ in
-                guard let self else { return }
-                let motionActivities = activities?.filter {
-                    !$0.stationary && ($0.walking || $0.running || $0.cycling || $0.automotive)
-                } ?? []
-                session.motionEventCount = motionActivities.count
-                session.motionTimestamps = motionActivities.map { $0.startDate }
-                session.snoreTimestamps = SleepMonitorService.shared.snoreTimestamps
-                session.calculateScore()
-                self.lastScore = session.score
-                self.lastDuration = session.duration
-                // 30分未満（スコア0確定）は記録しない
-                if session.duration < 1800 {
-                    context.delete(session)
-                    try? context.save()
-                } else {
-                    do {
-                        try context.save()
-                    } catch {
-                        self.dbError = "睡眠データの保存に失敗しました: \(error.localizedDescription)"
-                    }
-                    self.analytics.logWakeUp(
-                        Int(self.lastDuration / 60),
-                        self.lastScore,
-                        session.snoreTimestamps.count,
-                        session.motionEventCount
-                    )
-                }
-                SleepMonitorService.shared.stopMonitoring()
-                NotificationCenter.default.post(
-                    name: .didWakeUp,
-                    object: nil,
-                    userInfo: ["score": self.lastScore, "duration": self.lastDuration]
-                )
+        let snoreTimestamps = SleepMonitorService.shared.snoreTimestamps
+        SleepMonitorService.shared.stopMonitoring()
+
+        Task {
+            let result = await SleepSessionFinalizer.finalize(
+                session,
+                wakeTime: wakeTime,
+                snoreTimestamps: snoreTimestamps,
+                context: context
+            )
+            switch result {
+            case .saved(let score, let duration):
+                lastScore = score
+                lastDuration = duration
+                analytics.logWakeUp(Int(duration / 60), score, session.snoreTimestamps.count, session.motionEventCount)
+            case .discarded:
+                break
             }
-        } else {
-            // CoreMotion 非対応デバイスはフォールバック
-            session.motionEventCount = SleepMonitorService.shared.motionEventCount
-            session.motionTimestamps = SleepMonitorService.shared.motionTimestamps
-            session.snoreTimestamps = SleepMonitorService.shared.snoreTimestamps
-            session.calculateScore()
-            lastScore = session.score
-            lastDuration = session.duration
-            // 30分未満（スコア0確定）は記録しない
-            if session.duration < 1800 {
-                context.delete(session)
-                try? context.save()
-            } else {
-                try? context.save()
-                analytics.logWakeUp(
-                    Int(lastDuration / 60),
-                    lastScore,
-                    session.snoreTimestamps.count,
-                    session.motionEventCount
-                )
-            }
-            SleepMonitorService.shared.stopMonitoring()
             NotificationCenter.default.post(
                 name: .didWakeUp,
                 object: nil,
@@ -274,6 +230,7 @@ final class BedtimeViewModel {
         guard !isFinished else { return }
         isFinished = true
         restoreScreen()
+        BedtimeReminderService.shared.cancelWakeCheck()
         endSession()
         Task {
             await cancelAllAlarms()
@@ -301,12 +258,14 @@ final class BedtimeViewModel {
         stopAudio()
         deactivateAudioSession()
         restoreScreen()
+        BedtimeReminderService.shared.cancelWakeCheck()
         if let session = currentSession, let context = modelContext {
             let durationMinutes = Int(Date().timeIntervalSince(session.bedTime) / 60)
             analytics.logBedtimeCancelled(durationMinutes)
             currentSession = nil
-            context.delete(session)
-            try? context.save()
+            SleepSessionFinalizer.discard(session, context: context)
+        } else {
+            SleepSessionFinalizer.clearActive()
         }
         SleepMonitorService.shared.stopMonitoring()
     }

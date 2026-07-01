@@ -124,6 +124,15 @@ struct HomeView: View {
         } message: {
             Text(viewModel.dbError ?? "")
         }
+        .alert("昨夜の記録が未完了です", isPresented: Binding(
+            get: { viewModel.incompleteSession != nil },
+            set: { if !$0 { viewModel.discardIncompleteSession() } }
+        )) {
+            Button("今起きた") { viewModel.finalizeIncompleteSession() }
+            Button("記録を破棄", role: .destructive) { viewModel.discardIncompleteSession() }
+        } message: {
+            Text(viewModel.incompleteSessionMessage)
+        }
     }
 }
 

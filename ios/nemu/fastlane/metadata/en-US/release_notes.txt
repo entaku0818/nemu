@@ -1,2 +1,2 @@
-Fixed an issue where the app would be terminated in the background during bedtime mode.
-The audio session is now maintained even when "No Sound" is selected, ensuring alarms trigger reliably.
+Fixed an issue with subscription purchases.
+Stability improvements and bug fixes.

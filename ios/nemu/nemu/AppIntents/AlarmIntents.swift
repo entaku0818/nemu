@@ -11,6 +11,7 @@ import Foundation
 
 struct WakeUpIntent: AppIntent, LiveActivityIntent {
     static let title: LocalizedStringResource = "起きた！"
+    static let openAppWhenRun: Bool = true
 
     func perform() async throws -> some IntentResult {
         // AlarmKit経由での起床フラグを保存（アプリ未起動時の復元用）
