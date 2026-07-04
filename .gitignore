@@ -14,3 +14,7 @@ ios/nemu/build/
 
 # Playwright MCP
 .playwright-mcp/
+.playwright-cli/
+
+# Agent artifacts
+.agents/
