@@ -87,8 +87,10 @@ struct SettingsView: View {
                     // 就寝リマインダー
                     SettingsSection(title: "就寝リマインダー") {
                         SettingsRow(icon: "bell.fill", iconColor: .indigo, title: "リマインダー") {
-                            Toggle("", isOn: $reminderEnabled)
+                            Toggle("就寝リマインダー", isOn: $reminderEnabled)
+                                .labelsHidden()
                                 .tint(.indigo)
+                                .accessibilityLabel("就寝リマインダー")
                                 .onChange(of: reminderEnabled) { scheduleReminder() }
                         }
 

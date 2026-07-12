@@ -157,7 +157,7 @@ final class BedtimeViewModel {
         do {
             try modelContext.save()
         } catch {
-            dbError = "セッションの開始に失敗しました: \(error.localizedDescription)"
+            dbError = "セッションの開始に失敗しました。もう一度お試しください。"
             return
         }
         self.currentSession = session

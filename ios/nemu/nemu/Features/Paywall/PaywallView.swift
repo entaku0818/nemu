@@ -73,6 +73,7 @@ struct PaywallView: View {
                             .font(.title2)
                             .foregroundStyle(.white.opacity(0.3))
                     }
+                    .accessibilityLabel("閉じる")
                     .padding()
                 }
 

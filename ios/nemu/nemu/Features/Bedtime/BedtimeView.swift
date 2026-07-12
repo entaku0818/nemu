@@ -48,6 +48,7 @@ struct BedtimeView: View {
                             .font(.title3)
                             .foregroundStyle(.white.opacity(0.4))
                     }
+                    .accessibilityLabel("就寝モードを終了")
 
                     Spacer()
 
