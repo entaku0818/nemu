@@ -20,3 +20,26 @@ jobs:
       - name: Run SwiftLint
         working-directory: ios/nemu
         run: swiftlint lint --reporter github-actions-logging
+
+  build-and-test:
+    name: Build & Test
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build
+        working-directory: ios/nemu
+        run: |
+          xcodebuild build \
+            -project nemu.xcodeproj \
+            -scheme nemu \
+            -destination "platform=iOS Simulator,name=iPhone 16" \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Test
+        working-directory: ios/nemu
+        run: |
+          xcodebuild test \
+            -project nemu.xcodeproj \
+            -scheme nemu \
+            -destination "platform=iOS Simulator,name=iPhone 16" \
+            -only-testing:nemuTests \
+            CODE_SIGNING_ALLOWED=NO
