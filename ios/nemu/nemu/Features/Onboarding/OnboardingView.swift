@@ -6,6 +6,7 @@
 import SwiftUI
 import SwiftData
 import CoreLocation
+import UIKit
 
 struct OnboardingView: View {
     @State private var viewModel = OnboardingViewModel()
@@ -330,7 +331,7 @@ struct PermissionsPage: View {
                     icon: "bell.badge.fill",
                     title: "通知",
                     description: "就寝リマインダーとアラームに使います",
-                    status: viewModel.notificationStatus == .authorized
+                    state: viewModel.notificationState
                 ) {
                     Task { await viewModel.requestNotification() }
                 }
@@ -339,8 +340,7 @@ struct PermissionsPage: View {
                     icon: "location.fill",
                     title: "位置情報",
                     description: "日の出時刻の取得に使います",
-                    status: viewModel.locationStatus == .authorizedWhenInUse ||
-                            viewModel.locationStatus == .authorizedAlways
+                    state: viewModel.locationState
                 ) {
                     viewModel.requestLocation()
                 }
@@ -349,9 +349,18 @@ struct PermissionsPage: View {
                     icon: "mic.fill",
                     title: "マイク",
                     description: "就寝中のいびきを検知するために使います",
-                    status: viewModel.microphoneGranted
+                    state: viewModel.microphoneState
                 ) {
                     Task { await viewModel.requestMicrophone() }
+                }
+
+                PermissionRow(
+                    icon: "figure.walk.motion",
+                    title: "体の動き",
+                    description: "睡眠中の体動を検知して、起床タイミングの精度を高めます",
+                    state: viewModel.motionState
+                ) {
+                    viewModel.requestMotion()
                 }
             }
             .padding(.horizontal, 8)
@@ -364,7 +373,7 @@ private struct PermissionRow: View {
     let icon: String
     let title: String
     let description: String
-    let status: Bool
+    let state: PermissionState
     let action: () -> Void
 
     var body: some View {
@@ -385,24 +394,44 @@ private struct PermissionRow: View {
 
             Spacer()
 
-            Button(action: action) {
-                Text(status ? "許可済み" : "続ける")
+            Button(action: buttonAction) {
+                Text(buttonText)
                     .font(.caption.bold())
-                    .foregroundStyle(status ? .white.opacity(0.5) : .white)
+                    .foregroundStyle(state == .authorized ? .white.opacity(0.5) : .white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(
                         Capsule()
-                            .fill(status ? Color.white.opacity(0.1) : Color.indigo)
+                            .fill(state == .authorized ? Color.white.opacity(0.1) : Color.indigo)
                     )
             }
-            .disabled(status)
+            .disabled(state == .authorized)
         }
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 14)
                 .fill(Color.white.opacity(0.07))
         )
+    }
+
+    private var buttonText: String {
+        switch state {
+        case .notDetermined: return "続ける"
+        case .authorized:    return "許可済み"
+        case .denied:        return "設定を開く"
+        }
+    }
+
+    /// denied の場合はシステムが再度ダイアログを出さないため、
+    /// リクエストをやり直すのではなく設定アプリのアプリ設定画面へ誘導する。
+    private func buttonAction() {
+        guard state != .denied else {
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
+            return
+        }
+        action()
     }
 }
 
