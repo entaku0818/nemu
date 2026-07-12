@@ -207,14 +207,16 @@ final class BedtimeViewModel {
                 lastScore = score
                 lastDuration = duration
                 analytics.logWakeUp(Int(duration / 60), score, session.snoreTimestamps.count, session.motionEventCount)
+                // 破棄されたセッション（30分未満）では通知しない。記録もされていないのに
+                // 「記録されました」バナーやスコア画面が出てしまう不整合を防ぐため。
+                NotificationCenter.default.post(
+                    name: .didWakeUp,
+                    object: nil,
+                    userInfo: ["score": lastScore, "duration": lastDuration]
+                )
             case .discarded:
                 break
             }
-            NotificationCenter.default.post(
-                name: .didWakeUp,
-                object: nil,
-                userInfo: ["score": lastScore, "duration": lastDuration]
-            )
         }
     }
 
