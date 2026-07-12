@@ -30,6 +30,7 @@ struct AlarmListView: View {
                             .font(.title3)
                             .foregroundStyle(.white.opacity(0.5))
                     }
+                    .accessibilityLabel("閉じる")
 
                     Spacer()
 
@@ -53,6 +54,7 @@ struct AlarmListView: View {
                                 .font(.title3)
                                 .foregroundStyle(.indigo)
                         }
+                        .accessibilityLabel("アラームを追加")
                     }
                 }
                 .padding()
@@ -158,8 +160,10 @@ private struct AlarmRow: View {
             Spacer()
 
             // ON/OFF
-            Toggle("", isOn: $alarm.isEnabled)
+            Toggle("\(timeString(from: alarm.wakeTime))のアラーム", isOn: $alarm.isEnabled)
+                .labelsHidden()
                 .tint(.indigo)
+                .accessibilityLabel("\(timeString(from: alarm.wakeTime))のアラーム")
                 .onChange(of: alarm.isEnabled) {
                     Task {
                         if alarm.isEnabled {
