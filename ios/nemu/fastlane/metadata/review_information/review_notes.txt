@@ -16,4 +16,5 @@ Subscription information:
 - Manage via Apple ID Settings
 
 No login required. No external accounts needed.
-External services: RevenueCat (IAP), Firebase Analytics/Crashlytics/AppCheck, Google AdMob+UMP, HealthKit, AlarmKit.
+External services: RevenueCat (IAP), Firebase Analytics/Crashlytics/AppCheck, Google AdMob+UMP, AlarmKit.
+Note: HealthKit integration was removed in build 12; the app no longer requests HealthKit access.

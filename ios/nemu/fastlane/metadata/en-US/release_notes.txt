@@ -1,2 +1,4 @@
-Fixed an issue with subscription purchases.
+Sleep sessions now automatically recover if the app is closed unexpectedly.
+Added a local notification to let you know when it's time to wake up.
+Removed HealthKit integration and streamlined the permissions the app requests.
 Stability improvements and bug fixes.
