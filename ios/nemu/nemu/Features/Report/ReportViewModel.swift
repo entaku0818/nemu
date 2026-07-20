@@ -63,6 +63,26 @@ final class ReportViewModel {
         return SleepSessionRepository(context: context).weeklyScores()
     }
 
+    // MARK: - 長期トレンドグラフ用データ（プレミアム）
+
+    enum TrendRange: String, CaseIterable, Identifiable {
+        case days30 = "30日"
+        case days90 = "90日"
+        case allTime = "全期間"
+
+        var id: String { rawValue }
+    }
+
+    func trendScores(_ range: TrendRange) -> [(date: Date, score: Int)] {
+        guard let context = modelContext else { return [] }
+        let repo = SleepSessionRepository(context: context)
+        switch range {
+        case .days30: return repo.weeklyScores(days: 30)
+        case .days90: return repo.weeklyScores(days: 90)
+        case .allTime: return repo.allScores()
+        }
+    }
+
     // MARK: - CSVエクスポート
 
     var csvString: String {

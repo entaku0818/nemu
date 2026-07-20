@@ -60,6 +60,14 @@ final class SleepSessionRepository {
         }.reversed()
     }
 
+    /// 全期間の (date, score) ペア（データがある日のみ、昇順）
+    func allScores() -> [(date: Date, score: Int)] {
+        let calendar = Calendar.current
+        return fetchValid()
+            .map { (calendar.startOfDay(for: $0.bedTime), $0.score) }
+            .sorted { $0.0 < $1.0 }
+    }
+
     /// 連続睡眠日数
     func streak() -> Int {
         let valid = fetchValid()

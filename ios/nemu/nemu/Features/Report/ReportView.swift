@@ -12,6 +12,7 @@ struct ReportView: View {
     @Environment(\.analyticsClient) private var analytics
     @State private var viewModel = ReportViewModel()
     @State private var showPaywall = false
+    @State private var paywallSource = "unknown"
     @State private var purchaseService = PurchaseService.shared
 
     private let historyLimit = 7
@@ -56,6 +57,16 @@ struct ReportView: View {
                     // 週間グラフ
                     WeeklyChartCard(weeklyScores: viewModel.weeklyScores)
 
+                    // 長期トレンドグラフ（プレミアム限定・無料はぼかし表示）
+                    SleepTrendCard(
+                        viewModel: viewModel,
+                        isPremium: purchaseService.isPremium,
+                        onUnlock: {
+                            paywallSource = "report_trend_chart"
+                            showPaywall = true
+                        }
+                    )
+
                     // 履歴リスト
                     if !viewModel.allSessions.isEmpty {
                         let visibleSessions = purchaseService.isPremium
@@ -66,7 +77,10 @@ struct ReportView: View {
                         SessionHistoryCard(
                             sessions: visibleSessions,
                             hasMore: hasMore,
-                            onUnlock: { showPaywall = true }
+                            onUnlock: {
+                                paywallSource = "report_history_lock"
+                                showPaywall = true
+                            }
                         )
 
                         // CSVエクスポート（プレミアムのみ）
@@ -105,7 +119,7 @@ struct ReportView: View {
             }
         }
         .sheet(isPresented: $showPaywall) {
-            PaywallView(sessions: viewModel.allSessions)
+            PaywallView(sessions: viewModel.allSessions, analyticsSource: paywallSource)
         }
         .onAppear {
             viewModel.setup(modelContext: modelContext)
@@ -356,6 +370,129 @@ struct WeeklyChartCard: View {
                 .fill(Color.white.opacity(0.07))
         )
         .padding(.horizontal)
+    }
+}
+
+// MARK: - 長期トレンドグラフ（プレミアム）
+
+/// デザイン仕様：無料は「グラフをぼかして表示 → プレミアムで確認」の転換導線（DESIGN.md §6）
+struct SleepTrendCard: View {
+    let viewModel: ReportViewModel
+    let isPremium: Bool
+    var onUnlock: (() -> Void)?
+
+    @State private var selectedRange: ReportViewModel.TrendRange = .days30
+
+    private var displayedRange: ReportViewModel.TrendRange {
+        isPremium ? selectedRange : .days30
+    }
+
+    private var scores: [(date: Date, score: Int)] {
+        viewModel.trendScores(displayedRange)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Label("睡眠傾向", systemImage: "chart.xyaxis.line")
+                    .font(.caption.bold())
+                    .foregroundStyle(Color.assetGold)
+                Spacer()
+                if isPremium {
+                    Picker("期間", selection: $selectedRange) {
+                        ForEach(ReportViewModel.TrendRange.allCases) { range in
+                            Text(range.rawValue).tag(range)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 200)
+                }
+            }
+
+            ZStack {
+                TrendChart(scores: scores)
+                    .blur(radius: isPremium ? 0 : 8)
+                    .allowsHitTesting(isPremium)
+
+                if !isPremium {
+                    Button {
+                        onUnlock?()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "lock.fill")
+                                .font(.caption)
+                            Text("長期グラフを見る")
+                                .font(.subheadline)
+                            Text("プレミアム")
+                                .font(.caption.bold())
+                                .foregroundStyle(.black)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Capsule().fill(Color.assetGold))
+                        }
+                        .foregroundStyle(Color.assetGold)
+                        .padding(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.black.opacity(0.4))
+                        )
+                    }
+                }
+            }
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.white.opacity(0.07))
+        )
+        .padding(.horizontal)
+    }
+}
+
+private struct TrendChart: View {
+    let scores: [(date: Date, score: Int)]
+
+    private var maxScore: Int { scores.map(\.score).max() ?? 0 }
+
+    var body: some View {
+        Chart(scores, id: \.date) { item in
+            AreaMark(
+                x: .value("日付", item.date, unit: .day),
+                y: .value("スコア", item.score)
+            )
+            .foregroundStyle(
+                LinearGradient(
+                    colors: [Color.assetGold.opacity(0.35), Color.assetGold.opacity(0.0)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .interpolationMethod(.catmullRom)
+
+            LineMark(
+                x: .value("日付", item.date, unit: .day),
+                y: .value("スコア", item.score)
+            )
+            .foregroundStyle(item.score > 0 ? Color.assetGold : Color.white.opacity(0.1))
+            .lineStyle(StrokeStyle(lineWidth: 2))
+            .interpolationMethod(.catmullRom)
+        }
+        .chartXAxis {
+            AxisMarks(values: .automatic(desiredCount: 4)) { _ in
+                AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                    .foregroundStyle(Color.white.opacity(0.4))
+            }
+        }
+        .chartYAxis {
+            AxisMarks(values: [0, 50, 100]) { _ in
+                AxisValueLabel()
+                    .foregroundStyle(Color.white.opacity(0.3))
+                AxisGridLine()
+                    .foregroundStyle(Color.white.opacity(0.05))
+            }
+        }
+        .chartYScale(domain: 0...100)
+        .frame(height: 150)
     }
 }
 
