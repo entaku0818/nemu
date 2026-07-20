@@ -52,6 +52,7 @@ final class OnboardingViewModel: NSObject {
     var motionStatus: CMAuthorizationStatus = CMMotionActivityManager.authorizationStatus()
 
     private let locationManager = CLLocationManager()
+    private let healthKitService = HealthKitService.shared
 
     // MARK: - 表示用の状態
 
@@ -86,6 +87,16 @@ final class OnboardingViewModel: NSObject {
         default: return .notDetermined
         }
     }
+
+    var healthKitState: PermissionState {
+        switch healthKitService.permissionState {
+        case .authorized: return .authorized
+        case .denied: return .denied
+        case .notDetermined, .unavailable: return .notDetermined
+        }
+    }
+
+    var isHealthKitAvailable: Bool { healthKitService.isAvailable }
 
     override init() {
         super.init()
@@ -156,6 +167,15 @@ final class OnboardingViewModel: NSObject {
                 ])
             }
         }
+    }
+
+    // MARK: - HealthKit権限
+    func requestHealthKit() async {
+        await healthKitService.requestAuthorization()
+        Analytics.logEvent("onboarding_permission_result", parameters: [
+            "type": "healthkit",
+            "granted": healthKitState == .authorized ? "true" : "false"
+        ])
     }
 }
 

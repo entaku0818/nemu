@@ -207,6 +207,7 @@ final class BedtimeViewModel {
                 lastScore = score
                 lastDuration = duration
                 analytics.logWakeUp(Int(duration / 60), score, session.snoreTimestamps.count, session.motionEventCount)
+                await HealthKitService.shared.saveSleepSession(bedTime: session.bedTime, wakeTime: wakeTime)
                 // 破棄されたセッション（30分未満）では通知しない。記録もされていないのに
                 // 「記録されました」バナーやスコア画面が出てしまう不整合を防ぐため。
                 NotificationCenter.default.post(

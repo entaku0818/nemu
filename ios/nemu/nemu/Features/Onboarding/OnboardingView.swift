@@ -362,6 +362,17 @@ struct PermissionsPage: View {
                 ) {
                     viewModel.requestMotion()
                 }
+
+                if viewModel.isHealthKitAvailable {
+                    PermissionRow(
+                        icon: "heart.fill",
+                        title: "ヘルスケア",
+                        description: "睡眠データをヘルスケアアプリに保存します",
+                        state: viewModel.healthKitState
+                    ) {
+                        Task { await viewModel.requestHealthKit() }
+                    }
+                }
             }
             .padding(.horizontal, 8)
         }
