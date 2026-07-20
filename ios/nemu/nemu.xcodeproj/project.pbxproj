@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		61595DD02FB21D67001D1F6B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61595DCF2FB21D67001D1F6B /* WidgetKit.framework */; };
 		61595DD22FB21D67001D1F6B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 61595DD12FB21D67001D1F6B /* SwiftUI.framework */; };
+		AA0006FF2F7800000000D8D5 /* WeatherKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA0007FF2F7800000000D8D5 /* WeatherKit.framework */; };
 		61595DE12FB21D69001D1F6B /* NemuWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 61595DCD2FB21D67001D1F6B /* NemuWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		61E5A9EE2F7756890002D8D5 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 65DA4E70E5F848C5A695D2E9 /* GoogleMobileAds */; };
 		61E5AAEC2F7778B20002D8D5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E5AAEB2F7778B20002D8D5 /* GoogleService-Info.plist */; };
@@ -59,6 +60,7 @@
 		61595DCD2FB21D67001D1F6B /* NemuWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NemuWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		61595DCF2FB21D67001D1F6B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		61595DD12FB21D67001D1F6B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		AA0007FF2F7800000000D8D5 /* WeatherKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WeatherKit.framework; path = System/Library/Frameworks/WeatherKit.framework; sourceTree = SDKROOT; };
 		61C83B182F5D7A2B00D24258 /* nemu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = nemu.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		61C83B252F5D7A2D00D24258 /* nemuTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = nemuTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		61C83B2F2F5D7A2D00D24258 /* nemuUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = nemuUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -119,6 +121,7 @@
 				FBA004FF2F7800000000D8D5 /* FirebaseAnalytics in Frameworks */,
 				FBA005FF2F7800000000D8D5 /* FirebaseCrashlytics in Frameworks */,
 				AA0003FF2F7800000000D8D5 /* RevenueCat in Frameworks */,
+				AA0006FF2F7800000000D8D5 /* WeatherKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -144,6 +147,7 @@
 			children = (
 				61595DCF2FB21D67001D1F6B /* WidgetKit.framework */,
 				61595DD12FB21D67001D1F6B /* SwiftUI.framework */,
+				AA0007FF2F7800000000D8D5 /* WeatherKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -594,6 +598,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "nemu.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = 4YZQY4C47E;
@@ -623,6 +628,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "nemu.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = 4YZQY4C47E;
