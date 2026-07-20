@@ -19,7 +19,7 @@
 ### 証明書とプロビジョニング
 - [ ] App Store Distribution 証明書が有効
 - [ ] App Store プロビジョニングプロファイルが有効
-- [ ] fastlane match が正しく設定されている（使用している場合）
+- [ ] Distribution証明書・プロビジョニングプロファイルが自動署名（Xcode）で解決できる
 
 ### App Store Connect
 - [ ] アプリの基本情報が最新（名前、説明、カテゴリなど）
@@ -37,7 +37,7 @@
 - [ ] テスト観点リストを作成
 
 ### アップロード
-- [ ] `fastlane beta` でアップロード成功
+- [ ] `launchpad ios build && launchpad ios upload` でアップロード成功
 - [ ] App Store Connectでビルドのステータスが「処理中」になっている
 - [ ] 10-15分後に「テスト可能」になったことを確認
 
@@ -75,7 +75,7 @@
 - [ ] アプリ内購入の設定確認（該当する場合）
 
 ### アップロード
-- [ ] `fastlane release` でアップロード成功
+- [ ] `launchpad release --ios` でアップロード・審査提出成功
 - [ ] App Store Connectで「レビュー待ち」ステータス確認
 - [ ] 必要に応じてレビュー用メモを追加（特殊な操作が必要な場合）
 - [ ] 連絡先情報が正しい
@@ -148,26 +148,17 @@
 ## 便利なコマンド集
 
 ```bash
-# ビルド番号の確認
-fastlane run get_build_number
+# バージョン・ビルド番号の確認
+launchpad ios version-bump show
 
-# バージョン番号の確認
-fastlane run get_version_number
-
-# 最新のTestFlightビルド番号を取得
-fastlane run latest_testflight_build_number
-
-# App Store Connectのステータス確認
-fastlane run get_version_number_from_git_branch
-
-# スクリーンショット生成
-fastlane snapshot
-
-# メタデータのダウンロード
-fastlane deliver --download_metadata
+# 最新のTestFlightビルド一覧
+launchpad ios builds list
 
 # メタデータのアップロード（バイナリなし）
-fastlane deliver --skip_binary_upload
+launchpad ios metadata
+
+# スクリーンショットのアップロード
+launchpad ios screenshots
 ```
 
 ## 参考タイムライン

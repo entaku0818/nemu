@@ -1,0 +1,9 @@
+{
+  "ios": {
+    "project": "nemu.xcodeproj",
+    "scheme": "nemu",
+    "bundleId": "com.entaku.slumber",
+    "output": "./build",
+    "exportMethod": "app-store"
+  }
+}
