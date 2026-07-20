@@ -28,6 +28,8 @@
 	<string>日の出時刻を取得して、自然な目覚めをサポートするために使用します。</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>就寝中の騒音レベルを検知して、睡眠環境を分析するために使用します。</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>ヘルスケアアプリと連携するために使用します。睡眠データの書き込みのみ行い、読み取りは行いません。</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>睡眠データをヘルスケアアプリに保存するために使用します。</string>
 	<key>NSMotionUsageDescription</key>
