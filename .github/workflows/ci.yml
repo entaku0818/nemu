@@ -1,3 +1,7 @@
+# GitHub Actions では ubuntu 上の軽量チェック（SwiftLint）のみを実行する。
+# iOS の build / test はローカルで確認する運用（コマンドは CONTRIBUTING.md 参照）。
+# macOSランナー(xcodebuild)のジョブをここに追加しないこと — 過去に2回追加され、
+# コスト浪費とシミュレータ環境ドリフトによる赤化を招いている。
 name: CI
 
 on:
@@ -20,26 +24,3 @@ jobs:
       - name: Run SwiftLint
         working-directory: ios/nemu
         run: swiftlint lint --reporter github-actions-logging
-
-  build-and-test:
-    name: Build & Test
-    runs-on: macos-15
-    steps:
-      - uses: actions/checkout@v5
-      - name: Build
-        working-directory: ios/nemu
-        run: |
-          xcodebuild build \
-            -project nemu.xcodeproj \
-            -scheme nemu \
-            -destination "platform=iOS Simulator,name=iPhone 16" \
-            CODE_SIGNING_ALLOWED=NO
-      - name: Test
-        working-directory: ios/nemu
-        run: |
-          xcodebuild test \
-            -project nemu.xcodeproj \
-            -scheme nemu \
-            -destination "platform=iOS Simulator,name=iPhone 16" \
-            -only-testing:nemuTests \
-            CODE_SIGNING_ALLOWED=NO
