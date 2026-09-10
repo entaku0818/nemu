@@ -18,3 +18,7 @@ ios/nemu/build/
 
 # Agent artifacts
 .agents/
+
+# Xcode のユーザー個別状態（IDE生成物・追跡しない）
+xcuserdata/
+*.xcuserstate
