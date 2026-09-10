@@ -342,7 +342,7 @@ struct PermissionsPage: View {
                     description: "日の出時刻の取得に使います",
                     state: viewModel.locationState
                 ) {
-                    viewModel.requestLocation()
+                    Task { await viewModel.requestLocation() }
                 }
 
                 PermissionRow(
@@ -360,7 +360,7 @@ struct PermissionsPage: View {
                     description: "睡眠中の体動を検知して、起床タイミングの精度を高めます",
                     state: viewModel.motionState
                 ) {
-                    viewModel.requestMotion()
+                    Task { await viewModel.requestMotion() }
                 }
 
                 if viewModel.isHealthKitAvailable {

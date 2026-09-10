@@ -54,6 +54,14 @@ final class OnboardingViewModel: NSObject {
     private let locationManager = CLLocationManager()
     private let healthKitService = HealthKitService.shared
 
+    /// 位置情報・モーションはコールバック型 API のため、順次リクエストの完了待ちに使う。
+    private var locationContinuation: CheckedContinuation<Void, Never>?
+    /// queryActivityStarting のコールバックが返るまで解放されないよう保持する。
+    private var motionActivityManager: CMMotionActivityManager?
+
+    /// システムダイアログの応答が返らなかった場合に順次リクエストが止まらないようにする上限。
+    private static let permissionResponseTimeout: Duration = .seconds(30)
+
     // MARK: - 表示用の状態
 
     var notificationState: PermissionState {
@@ -110,8 +118,28 @@ final class OnboardingViewModel: NSObject {
         currentPage = next
     }
 
-    func skipPermissions() {
-        nextPage()
+    /// 権限説明ページで「次へ」を押したときに、未確定の権限のシステムダイアログを順に表示する。
+    ///
+    /// App Store Review Guideline 5.1.1(iv) は「事前説明を見せたあとは必ずシステムの許可リクエストに
+    /// 進ませること」を求めている。説明だけ見て次へ進めてしまう導線は v1.1 (14) で却下されたため、
+    /// 「次へ」＝未確定の権限をすべて聞く、という不可分の動作にしている。
+    /// 各ダイアログでの許可・拒否はあくまでユーザーの自由で、拒否しても先には進める。
+    func requestPendingPermissions() async {
+        if notificationState == .notDetermined {
+            await requestNotification()
+        }
+        if locationState == .notDetermined {
+            await requestLocation()
+        }
+        if microphoneState == .notDetermined {
+            await requestMicrophone()
+        }
+        if motionState == .notDetermined {
+            await requestMotion()
+        }
+        if isHealthKitAvailable, healthKitState == .notDetermined {
+            await requestHealthKit()
+        }
     }
 
     func trackPageView(_ page: OnboardingPage) {
@@ -134,8 +162,27 @@ final class OnboardingViewModel: NSObject {
     }
 
     // MARK: - 位置情報権限
-    func requestLocation() {
-        locationManager.requestWhenInUseAuthorization()
+    /// ダイアログへの応答（= 認可状態の変化）が届くまで待つ。
+    func requestLocation() async {
+        guard locationState == .notDetermined else { return }
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            locationContinuation = continuation
+            locationManager.requestWhenInUseAuthorization()
+            startPermissionWatchdog { [weak self] in self?.resumeLocationContinuation() }
+        }
+    }
+
+    private func resumeLocationContinuation() {
+        locationContinuation?.resume()
+        locationContinuation = nil
+    }
+
+    /// 応答が返らないまま順次リクエストが止まるのを防ぐ保険。
+    private func startPermissionWatchdog(_ resume: @escaping @MainActor () -> Void) {
+        Task { @MainActor in
+            try? await Task.sleep(for: Self.permissionResponseTimeout)
+            resume()
+        }
     }
 
     // MARK: - マイク権限
@@ -153,18 +200,25 @@ final class OnboardingViewModel: NSObject {
     /// 初回の API 呼び出し時に暗黙的にシステムの許可ダイアログが表示される。
     /// 起床確認時まで放置すると文脈のないタイミングで突然聞かれてしまうため、
     /// オンボーディングの権限説明ページで軽量なクエリを実行して前倒しでリクエストする。
-    func requestMotion() {
+    func requestMotion() async {
         guard CMMotionActivityManager.isActivityAvailable() else { return }
         let manager = CMMotionActivityManager()
+        motionActivityManager = manager
         let now = Date()
-        manager.queryActivityStarting(from: now.addingTimeInterval(-60), to: now, to: .main) { [weak self] _, _ in
-            Task { @MainActor in
-                guard let self else { return }
-                self.motionStatus = CMMotionActivityManager.authorizationStatus()
-                Analytics.logEvent("onboarding_permission_result", parameters: [
-                    "type": "motion",
-                    "granted": self.motionStatus == .authorized ? "true" : "false"
-                ])
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            manager.queryActivityStarting(from: now.addingTimeInterval(-60), to: now, to: .main) { [weak self] _, _ in
+                Task { @MainActor in
+                    // 保持していた manager を nil にすることで、万一コールバックが複数回来ても
+                    // continuation を二重 resume しない（二重 resume はクラッシュする）。
+                    guard let self, self.motionActivityManager != nil else { return }
+                    self.motionActivityManager = nil
+                    self.motionStatus = CMMotionActivityManager.authorizationStatus()
+                    Analytics.logEvent("onboarding_permission_result", parameters: [
+                        "type": "motion",
+                        "granted": self.motionStatus == .authorized ? "true" : "false"
+                    ])
+                    continuation.resume()
+                }
             }
         }
     }
