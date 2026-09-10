@@ -49,11 +49,6 @@ struct ReportView: View {
                         EmptyReportCard()
                     }
 
-                    // 天気カード（プレミアム限定）
-                    if purchaseService.isPremium {
-                        WeatherCard()
-                    }
-
                     // 週間グラフ
                     WeeklyChartCard(weeklyScores: viewModel.weeklyScores)
 

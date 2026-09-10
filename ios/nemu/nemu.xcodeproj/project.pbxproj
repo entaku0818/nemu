@@ -13,7 +13,6 @@
 		61E5A9EE2F7756890002D8D5 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 65DA4E70E5F848C5A695D2E9 /* GoogleMobileAds */; };
 		61E5AAEC2F7778B20002D8D5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 61E5AAEB2F7778B20002D8D5 /* GoogleService-Info.plist */; };
 		AA0003FF2F7800000000D8D5 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = AA0002FF2F7800000000D8D5 /* RevenueCat */; };
-		AA0006FF2F7800000000D8D5 /* WeatherKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA0007FF2F7800000000D8D5 /* WeatherKit.framework */; };
 		AA0008FF2F7800000000D8D5 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA0009FF2F7800000000D8D5 /* HealthKit.framework */; };
 		FBA004FF2F7800000000D8D5 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = FBA002FF2F7800000000D8D5 /* FirebaseAnalytics */; };
 		FBA005FF2F7800000000D8D5 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = FBA003FF2F7800000000D8D5 /* FirebaseCrashlytics */; };
@@ -65,7 +64,6 @@
 		61C83B252F5D7A2D00D24258 /* nemuTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = nemuTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		61C83B2F2F5D7A2D00D24258 /* nemuUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = nemuUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		61E5AAEB2F7778B20002D8D5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		AA0007FF2F7800000000D8D5 /* WeatherKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WeatherKit.framework; path = System/Library/Frameworks/WeatherKit.framework; sourceTree = SDKROOT; };
 		AA0009FF2F7800000000D8D5 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -123,7 +121,6 @@
 				FBA004FF2F7800000000D8D5 /* FirebaseAnalytics in Frameworks */,
 				FBA005FF2F7800000000D8D5 /* FirebaseCrashlytics in Frameworks */,
 				AA0003FF2F7800000000D8D5 /* RevenueCat in Frameworks */,
-				AA0006FF2F7800000000D8D5 /* WeatherKit.framework in Frameworks */,
 				AA0008FF2F7800000000D8D5 /* HealthKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -150,7 +147,6 @@
 			children = (
 				61595DCF2FB21D67001D1F6B /* WidgetKit.framework */,
 				61595DD12FB21D67001D1F6B /* SwiftUI.framework */,
-				AA0007FF2F7800000000D8D5 /* WeatherKit.framework */,
 				AA0009FF2F7800000000D8D5 /* HealthKit.framework */,
 			);
 			name = Frameworks;
