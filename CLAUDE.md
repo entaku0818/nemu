@@ -7,8 +7,8 @@ Nemu（ねむ）は睡眠記録・分析を行う iOS アプリ（Swift / SwiftU
 - Lint: `cd ios/nemu && swiftlint lint`
 - Test: `xcodebuild test -project ios/nemu/nemu.xcodeproj -scheme nemu -destination "platform=iOS Simulator,name=<Simulator名>" -only-testing:nemuTests CODE_SIGNING_ALLOWED=NO`
 
-CI（GitHub Actions）で走るのは SwiftLint（ubuntu）のみ。**build / test はローカル実行が唯一のゲート**。
-詳細と「macOSランナーのジョブを追加しない」理由は [CONTRIBUTING.md](CONTRIBUTING.md) 参照。
+CI（GitHub Actions）: SwiftLint は ubuntu（`ci.yml`）、build / test は entaku の Mac の self-hosted runner（`ios-ci.yml`）で実行。
+**GitHub-hosted の macOS ランナーは禁止、self-hosted（ios-ci.yml）のみ可**。詳細は [CONTRIBUTING.md](CONTRIBUTING.md) 参照。
 
 ## ループ運用（Loop Engineering）
 

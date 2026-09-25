@@ -2,25 +2,18 @@
 
 ## CI 方針
 
-**GitHub Actions で実行するのは ubuntu 上の軽量チェック（SwiftLint）のみ。**
-iOS の build / test は GitHub Actions では実行しない。**コミット前にローカルで確認する運用**。
-
 | チェック | 実行場所 | タイミング |
 | --- | --- | --- |
-| SwiftLint | GitHub Actions (`ubuntu-latest`) | push / PR で自動 |
-| Build | ローカル | コミット前に手動 |
-| Test (`nemuTests`) | ローカル | コミット前に手動 |
+| SwiftLint | GitHub Actions `ci.yml`（`ubuntu-latest`） | main への push / PR |
+| Build | GitHub Actions `ios-ci.yml`（self-hosted runner: entaku の Mac, Xcode 27） | 全ブランチへの push / PR / 手動 |
+| Test (`nemuTests`) | 同上 | 同上 |
 
-### なぜ macOS ランナーを使わないか
-
-- macOSランナーは Linux ランナーに対して課金レートが 10倍。`xcodebuild build` + `test` を
-  push / PR ごとにフル実行するとコストが大きい
-- シミュレータ名・Xcodeバージョンのドリフト（`iPhone 16` が消える、SDKが上がる等）で
-  プロダクトコードと無関係に赤くなり、ゲートとしての信頼性が低い
-
-`.github/workflows/ci.yml` に macOS ランナーのジョブを追加しないこと。
-過去に2回追加され、いずれもコスト浪費と環境ドリフトによる赤化を招いている
-（`b6529ae` で削除 → `75b0ff4` で再追加 → 2026-07-20 に複数回失敗）。
+- `ios-ci.yml` は `runs-on: [self-hosted, macOS, xcode27]`。専用シミュレータ `CI-nemu`（iOS 27.0）を使い、
+  無ければ自動作成する。DerivedData は runner の作業ディレクトリ配下に置く
+- フォークからの PR では実行しない（public リポジトリ + self-hosted runner のため）
+- **GitHub-hosted の `macos-*` ランナーのジョブは追加しないこと**（Linux の10倍の課金レート。
+  過去に追加 → コスト浪費と環境ドリフトによる赤化を招いた）。macOS が必要なジョブは self-hosted（`ios-ci.yml`）のみ可
+- Xcode Cloud は使わない
 
 ## コミット前に実行するコマンド
 
@@ -65,6 +58,6 @@ xcrun simctl list devices available | grep iPhone
 
 ## 注意
 
-- build / test は CI が見ていないため、**ローカルハーネスが唯一のゲート**になる。
+- CI（`ios-ci.yml`）は push 後に走るため、**コミット前のローカル確認は引き続き必須**。
   「たぶん動く」でコミットしない。実際にコマンドを実行して緑を確認する
-- CLAUDE.md の「緑でない変更を main に入れない」はこの前提で読むこと
+- self-hosted runner（entaku の Mac）がオフラインだと `ios-ci.yml` はキュー待ちになる

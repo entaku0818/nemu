@@ -1,7 +1,7 @@
-# GitHub Actions では ubuntu 上の軽量チェック（SwiftLint）のみを実行する。
-# iOS の build / test はローカルで確認する運用（コマンドは CONTRIBUTING.md 参照）。
-# macOSランナー(xcodebuild)のジョブをここに追加しないこと — 過去に2回追加され、
-# コスト浪費とシミュレータ環境ドリフトによる赤化を招いている。
+# このワークフローは ubuntu 上の軽量チェック（SwiftLint）のみを実行する。
+# iOS の build / test は self-hosted runner 上の ios-ci.yml で実行する。
+# GitHub-hosted の macos-* ランナーのジョブは追加しないこと（課金のため禁止）。
+# macOS が必要なジョブは self-hosted（ios-ci.yml）のみ可。
 name: CI
 
 on:

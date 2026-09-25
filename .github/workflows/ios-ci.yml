@@ -1,0 +1,72 @@
+# iOS build/test on the self-hosted macOS runner (entaku's Mac).
+# GitHub-hosted macos-* runners are NOT allowed (billing). Only this self-hosted workflow may run iOS jobs.
+name: iOS CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROJECT: ios/nemu/nemu.xcodeproj
+  SCHEME: nemu
+  SIM_NAME: CI-nemu
+  SIM_DEVICE_TYPE: com.apple.CoreSimulator.SimDeviceType.iPhone-18-Pro
+  SIM_RUNTIME: com.apple.CoreSimulator.SimRuntime.iOS-27-0
+
+jobs:
+  build-and-test:
+    # Never run on fork PRs (public repo + self-hosted runner)
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, macOS, xcode27]
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare simulator
+        run: |
+          UDID=$(xcrun simctl list devices -j | /usr/bin/python3 -c "import json,sys,os; d=json.load(sys.stdin)['devices'].get(os.environ['SIM_RUNTIME'],[]); print(next((x['udid'] for x in d if x['name']==os.environ['SIM_NAME'] and x['isAvailable']),''))")
+          if [ -z "$UDID" ]; then
+            UDID=$(xcrun simctl create "$SIM_NAME" "$SIM_DEVICE_TYPE" "$SIM_RUNTIME")
+          fi
+          xcrun simctl boot "$UDID" 2>/dev/null || true
+          xcrun simctl bootstatus "$UDID"
+          echo "SIM_UDID=$UDID" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
+            -destination "id=$SIM_UDID" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Test
+        run: |
+          set -o pipefail
+          rm -rf "$RUNNER_TEMP/TestResults.xcresult"
+          xcodebuild test \
+            -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
+            -destination "id=$SIM_UDID" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            -resultBundlePath "$RUNNER_TEMP/TestResults.xcresult" \
+            -only-testing:nemuTests \
+            -parallel-testing-enabled NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload xcresult
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TestResults-xcresult
+          path: ${{ runner.temp }}/TestResults.xcresult
+          if-no-files-found: ignore
