@@ -29,7 +29,7 @@ jobs:
     runs-on: [self-hosted, macOS, xcode27]
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Prepare simulator
         run: |
@@ -65,8 +65,19 @@ jobs:
 
       - name: Upload xcresult
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: TestResults-xcresult
           path: ${{ runner.temp }}/TestResults.xcresult
           if-no-files-found: ignore
+
+      # Self-hosted runner disk is shared: always drop per-job build outputs (after the artifact upload above).
+      # Keep the CI-nemu simulator (reused next run) and the shared SPM cache (~/Library/Caches/org.swift.swiftpm).
+      - name: Cleanup
+        if: always()
+        run: |
+          if [ -n "${SIM_UDID:-}" ]; then
+            xcrun simctl shutdown "$SIM_UDID" 2>/dev/null || true
+          fi
+          rm -rf "$RUNNER_TEMP/DerivedData" "$RUNNER_TEMP"/*.xcresult
+          du -sh "$RUNNER_TEMP" || true
