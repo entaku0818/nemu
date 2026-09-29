@@ -1,4 +1,3 @@
-Added a weather and temperature card to your morning report (Premium).
 Your sleep data can now be saved to the Health app.
 Added a longer-range sleep trend chart (30/90 days or all-time) (Premium).
 Stability improvements and bug fixes.

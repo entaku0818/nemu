@@ -16,5 +16,9 @@ Subscription information:
 - Manage via Apple ID Settings
 
 No login required. No external accounts needed.
-External services: RevenueCat (IAP), Firebase Analytics/Crashlytics/AppCheck, Google AdMob+UMP, AlarmKit.
-Note: HealthKit integration was removed in build 12; the app no longer requests HealthKit access.
+External services: RevenueCat (IAP), Firebase Analytics/Crashlytics/AppCheck, Google AdMob+UMP, AlarmKit, HealthKit.
+
+HealthKit (added in version 1.1):
+- Write-only: when a sleep session ends, the app saves one Sleep Analysis sample (asleepUnspecified, bedtime to wake time) to the Health app. The app does not read any HealthKit data.
+- Permission is requested on the onboarding permission screen ("ヘルスケア" row) and is optional; all features work if it is denied.
+- HealthKit data is not used for advertising or shared with third parties, and is not sent to any server.
