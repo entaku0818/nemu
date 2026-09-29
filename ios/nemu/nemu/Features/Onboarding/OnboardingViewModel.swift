@@ -113,9 +113,38 @@ final class OnboardingViewModel: NSObject {
 
     var isLastPage: Bool { currentPage == .complete }
 
+    /// 順次リクエスト中は「次へ」を無効にし、二重タップで同じダイアログを重ねて出さない。
+    private(set) var isRequestingPermissions = false
+
     func nextPage() {
         guard let next = OnboardingPage(rawValue: currentPage.rawValue + 1) else { return }
         currentPage = next
+    }
+
+    /// 「次へ」ボタン。権限説明ページでは、未確定の権限をすべて聞き終えてから次のページへ進む。
+    func advance() async {
+        if currentPage == .permissions {
+            await requestPendingPermissionsOnce()
+        }
+        nextPage()
+    }
+
+    /// TabView はスワイプでもページが変わるため、権限説明ページを前方へ離れた時点でも
+    /// 未確定の権限をリクエストする（説明だけ見て素通りできる導線を残さない）。
+    func handlePageChange(from oldPage: OnboardingPage, to newPage: OnboardingPage) async {
+        guard Self.isLeavingPermissionsForward(from: oldPage, to: newPage) else { return }
+        await requestPendingPermissionsOnce()
+    }
+
+    nonisolated static func isLeavingPermissionsForward(from oldPage: OnboardingPage, to newPage: OnboardingPage) -> Bool {
+        oldPage == .permissions && newPage.rawValue > oldPage.rawValue
+    }
+
+    private func requestPendingPermissionsOnce() async {
+        guard !isRequestingPermissions else { return }
+        isRequestingPermissions = true
+        defer { isRequestingPermissions = false }
+        await requestPendingPermissions()
     }
 
     /// 権限説明ページで「次へ」を押したときに、未確定の権限のシステムダイアログを順に表示する。

@@ -157,3 +157,23 @@ struct SleepScoreTests {
         #expect(bd.total >= 80)
     }
 }
+
+/// Guideline 5.1.1(iv): 権限説明ページを前方へ離れるときは必ずシステムの許可リクエストへ進む
+struct OnboardingPermissionFlowTests {
+
+    @Test("権限ページから次のページへ進むとリクエスト対象")
+    func leavingPermissionsForward() {
+        #expect(OnboardingViewModel.isLeavingPermissionsForward(from: .permissions, to: .wakeTime))
+    }
+
+    @Test("権限ページから前のページへ戻るときはリクエストしない")
+    func leavingPermissionsBackward() {
+        #expect(!OnboardingViewModel.isLeavingPermissionsForward(from: .permissions, to: .sunrise))
+    }
+
+    @Test("権限ページ以外のページ遷移ではリクエストしない")
+    func otherTransitions() {
+        #expect(!OnboardingViewModel.isLeavingPermissionsForward(from: .sunrise, to: .permissions))
+        #expect(!OnboardingViewModel.isLeavingPermissionsForward(from: .wakeTime, to: .complete))
+    }
+}

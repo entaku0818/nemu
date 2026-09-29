@@ -22,3 +22,9 @@ HealthKit (added in version 1.1):
 - Write-only: when a sleep session ends, the app saves one Sleep Analysis sample (asleepUnspecified, bedtime to wake time) to the Health app. The app does not read any HealthKit data.
 - Permission is requested on the onboarding permission screen ("ヘルスケア" row) and is optional; all features work if it is denied.
 - HealthKit data is not used for advertising or shared with third parties, and is not sent to any server.
+
+WeatherKit (Guideline 5.2.5 / 2.1(a) in the review of 1.1 (14)):
+- WeatherKit has been completely removed from the app. The weather card, WeatherKit framework and the WeatherKit entitlement are no longer included, and the app does not display any weather data.
+
+Permission requests (Guideline 5.1.1(iv) in the review of 1.1 (14)):
+- On the onboarding "必要な権限" (Permissions) screen, tapping "次へ" (Next) or swiping to the next page always presents the system permission dialogs for every permission that has not been determined yet (notifications, location, microphone, motion, Health). The explanation screen can no longer be dismissed without proceeding to the system requests. Users may freely allow or deny each request.

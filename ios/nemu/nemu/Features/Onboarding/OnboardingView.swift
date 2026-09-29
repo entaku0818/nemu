@@ -48,8 +48,9 @@ struct OnboardingView: View {
         .onAppear {
             viewModel.trackPageView(.welcome)
         }
-        .onChange(of: viewModel.currentPage) { _, page in
+        .onChange(of: viewModel.currentPage) { oldPage, page in
             viewModel.trackPageView(page)
+            Task { await viewModel.handlePageChange(from: oldPage, to: page) }
         }
     }
 
@@ -61,7 +62,7 @@ struct OnboardingView: View {
                     viewModel.trackCompleted()
                     saveAndComplete()
                 } else {
-                    viewModel.nextPage()
+                    Task { await viewModel.advance() }
                 }
             } label: {
                 Text(viewModel.isLastPage ? "はじめる" : "次へ")
@@ -74,6 +75,7 @@ struct OnboardingView: View {
                             .fill(Color.indigo.gradient)
                     )
             }
+            .disabled(viewModel.isRequestingPermissions)
             .padding(.horizontal, 24)
         }
         .padding(.bottom, 48)
